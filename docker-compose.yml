@@ -1,4 +1,5 @@
-# Lancement complet en local ou sur un serveur : docker compose up -d --build
+# Lancement en local (HTTP) : docker compose up -d --build
+# Pour la production (HTTPS), utilisez docker-compose.prod.yml (voir README).
 services:
   db:
     image: postgres:16-alpine
@@ -26,8 +27,8 @@ services:
       ADMIN_PHONE: ${ADMIN_PHONE:?Définissez ADMIN_PHONE dans .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans .env}
       APP_URL: ${APP_URL:-http://localhost:3000}
-      # À retirer dès que le site est servi en HTTPS (indispensable en production)
-      ALLOW_INSECURE_COOKIE: ${ALLOW_INSECURE_COOKIE:-1}
+      # Local uniquement : autorise le cookie de session sans HTTPS
+      ALLOW_INSECURE_COOKIE: "1"
     ports:
       - "3000:3000"
     volumes:

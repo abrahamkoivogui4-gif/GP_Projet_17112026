@@ -1,0 +1,73 @@
+# Production : Kola + PostgreSQL + Caddy (HTTPS automatique) + sauvegardes quotidiennes.
+# Lancement : docker compose -f docker-compose.prod.yml up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Définissez POSTGRES_PASSWORD dans .env}
+      POSTGRES_DB: gp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gp"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://gp:${POSTGRES_PASSWORD}@db:5432/gp
+      ADMIN_NAME: ${ADMIN_NAME:-Administrateur}
+      ADMIN_PHONE: ${ADMIN_PHONE:?Définissez ADMIN_PHONE dans .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans .env}
+      APP_URL: https://${DOMAIN:?Définissez DOMAIN dans .env}
+    expose:
+      - "3000" # accessible uniquement par Caddy, pas depuis Internet
+    volumes:
+      - uploads:/data
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    # Une sauvegarde par jour, conservée 14 jours
+    entrypoint: >
+      sh -c 'while true; do
+        pg_dump -h db -U gp gp | gzip > /backups/kola-$$(date +%F).sql.gz &&
+        find /backups -name "kola-*.sql.gz" -mtime +14 -delete;
+        sleep 86400;
+      done'
+
+volumes:
+  pgdata:
+  uploads:
+  caddy_data:
+  caddy_config:

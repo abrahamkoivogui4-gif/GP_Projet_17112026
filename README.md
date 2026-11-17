@@ -75,19 +75,41 @@ Au démarrage, le conteneur applique les migrations, crée le compte admin, puis
 
 ## Mettre en production
 
-1. Un serveur (VPS) en Europe avec Docker, par exemple chez Scaleway, OVH ou AWS Paris.
-2. Un nom de domaine qui pointe vers le serveur.
-3. Un reverse proxy HTTPS devant le port 3000 (Caddy est le plus simple : certificat automatique).
-4. Dans `.env` : un vrai `POSTGRES_PASSWORD`, un `ADMIN_PASSWORD` solide, `APP_URL=https://votre-domaine`, et **retirez `ALLOW_INSECURE_COOKIE`** (mettez `ALLOW_INSECURE_COOKIE=` vide) pour que le cookie de session ne circule qu'en HTTPS.
-5. Sauvegardes quotidiennes de la base : `docker compose exec db pg_dump -U gp gp > sauvegarde.sql`.
+Le fichier `docker-compose.prod.yml` lance tout ce qu'il faut : l'application, PostgreSQL, **Caddy** (HTTPS automatique avec Let's Encrypt) et une **sauvegarde quotidienne** de la base dans `./backups` (14 jours conservés).
 
-Exemple de `Caddyfile` :
+1. **Serveur** : un VPS Linux en Europe (2 Go de RAM suffisent pour démarrer), avec Docker installé (`curl -fsSL https://get.docker.com | sh`).
+2. **Domaine** : créez un enregistrement DNS `A` (et `AAAA` si IPv6) de votre domaine vers l'IP du serveur, plus `www` si besoin.
+3. **Pare-feu** : ouvrez seulement les ports 22, 80 et 443.
+4. **Installation** :
 
+   ```bash
+   git clone https://github.com/abrahamkoivogui4-gif/GP_Projet_17112026.git kola
+   cd kola
+   cp .env.production.example .env
+   nano .env        # DOMAIN, POSTGRES_PASSWORD, ADMIN_PHONE, ADMIN_PASSWORD
+   docker compose -f docker-compose.prod.yml up -d --build
+   ```
+
+5. Ouvrez `https://votre-domaine` et connectez-vous avec le compte admin.
+
+**Mettre à jour** après un nouveau commit :
+
+```bash
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
 ```
-votre-domaine.com {
-    reverse_proxy localhost:3000
-}
+
+Les migrations de la base s'appliquent toutes seules au démarrage.
+
+**Restaurer une sauvegarde** :
+
+```bash
+gunzip -c backups/kola-AAAA-MM-JJ.sql.gz | docker compose -f docker-compose.prod.yml exec -T db psql -U gp gp
 ```
+
+Pensez à copier régulièrement le dossier `backups/` hors du serveur (stockage objet, autre machine).
+
+**Suivre les logs** (dont les notifications) : `docker compose -f docker-compose.prod.yml logs -f app`
 
 ## Modifier les listes
 
