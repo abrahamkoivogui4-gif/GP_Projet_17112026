@@ -9,8 +9,8 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Plateforme GP", template: "%s · Plateforme GP" },
-  description: "Trouvez un GP de confiance pour envoyer vos colis entre la France et l'Afrique.",
+  title: { default: "Kola · Envoyez vos colis avec un GP de confiance", template: "%s · Kola" },
+  description: "Kola, le colis entre personnes de confiance. Trouvez un GP vérifié pour envoyer vos colis entre la France et l'Afrique.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };
@@ -19,7 +19,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0b7a4b",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
 
 async function navItems(): Promise<{ items: NavItem[]; user: Awaited<ReturnType<typeof getUser>> }> {
@@ -62,8 +65,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="top">
           <div className="brandrow">
             <Link href="/" className="brand">
-              <span className="logo">GP</span>
-              <b>Plateforme GP</b>
+              <span className="logo">K</span>
+              <b>Kola</b>
             </Link>
             {user && (
               <Link href="/compte" className="who-mini">

@@ -1,4 +1,6 @@
-# Plateforme GP
+# Kola
+
+> Kola, le colis entre personnes de confiance.
 
 Application web de mise en relation entre **GP** (voyageurs qui transportent des colis) et **expéditeurs**, sur les trajets France ↔ Afrique.
 
