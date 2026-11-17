@@ -1,0 +1,79 @@
+"use server";
+import { randomInt } from "node:crypto";
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { db } from "@/db";
+import { reports, reviews, sessions, trips, users, verificationDocs } from "@/db/schema";
+import { hashPassword, requireAdmin } from "@/lib/auth";
+import { notify } from "@/lib/notify";
+import { deleteUpload } from "@/lib/uploads";
+import type { FormState } from "./auth-actions";
+
+const num = (fd: FormData, k: string) => Number(fd.get(k)) || 0;
+
+export async function decideVerification(fd: FormData) {
+  await requireAdmin();
+  const doc = await db.query.verificationDocs.findFirst({ where: eq(verificationDocs.id, num(fd, "id")) });
+  if (!doc || doc.status !== "pending") return;
+  const approve = fd.get("decision") === "approve";
+  const note = String(fd.get("note") ?? "").trim().slice(0, 300);
+  if (doc.filePath) await deleteUpload(doc.filePath); // on ne garde pas la pièce d'identité
+  await db
+    .update(verificationDocs)
+    .set({ status: approve ? "approved" : "refused", adminNote: note, filePath: null, decidedAt: new Date() })
+    .where(eq(verificationDocs.id, doc.id));
+  const [u] = await db
+    .update(users)
+    .set({ verification: approve ? "verified" : "refused" })
+    .where(eq(users.id, doc.userId))
+    .returning({ phone: users.phone });
+  if (u) await notify(u.phone, approve ? "Votre identité est vérifiée : le badge GP vérifié s'affiche sur vos trajets." : "Votre vérification d'identité a été refusée. Ouvrez l'application pour en savoir plus.");
+  revalidatePath("/admin/verifications");
+}
+
+export async function updateReport(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "id");
+  const status = fd.get("status") === "closed" ? "closed" : "in_progress";
+  const reply = String(fd.get("reply") ?? "").trim().slice(0, 2000);
+  await db
+    .update(reports)
+    .set({ status, ...(reply ? { adminReply: reply } : {}), updatedAt: new Date() })
+    .where(eq(reports.id, id));
+  revalidatePath("/admin/signalements");
+}
+
+export async function setTripStatus(fd: FormData) {
+  await requireAdmin();
+  const status = fd.get("status") === "active" ? "active" : "suspended";
+  await db.update(trips).set({ status }).where(eq(trips.id, num(fd, "id")));
+  revalidatePath("/admin/trajets");
+  revalidatePath("/admin/signalements");
+  revalidatePath("/");
+}
+
+export async function setUserSuspended(fd: FormData) {
+  const admin = await requireAdmin();
+  const id = num(fd, "id");
+  if (id === admin.id) return;
+  const suspended = fd.get("suspended") === "1";
+  await db.update(users).set({ suspended }).where(eq(users.id, id));
+  if (suspended) await db.delete(sessions).where(eq(sessions.userId, id)); // déconnexion immédiate
+  revalidatePath("/admin/utilisateurs");
+  revalidatePath("/admin/signalements");
+}
+
+export async function resetPassword(_: FormState, fd: FormData): Promise<FormState> {
+  await requireAdmin();
+  const id = num(fd, "id");
+  const temp = String(randomInt(10_000_000, 99_999_999));
+  await db.update(users).set({ passwordHash: await hashPassword(temp) }).where(eq(users.id, id));
+  await db.delete(sessions).where(eq(sessions.userId, id));
+  return { ok: `Mot de passe temporaire : ${temp}. Donnez-le à la personne et demandez-lui de le changer dans « Mon compte ».` };
+}
+
+export async function deleteReview(fd: FormData) {
+  await requireAdmin();
+  await db.delete(reviews).where(eq(reviews.id, num(fd, "id")));
+  revalidatePath("/admin/avis");
+}

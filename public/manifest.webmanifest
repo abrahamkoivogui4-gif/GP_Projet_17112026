@@ -1,0 +1,13 @@
+{
+  "name": "Plateforme GP",
+  "short_name": "GP",
+  "description": "Trouvez un GP de confiance pour vos colis entre la France et l'Afrique.",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f6f4",
+  "theme_color": "#0b7a4b",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

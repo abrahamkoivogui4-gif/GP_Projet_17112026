@@ -1,0 +1,38 @@
+# Lancement complet en local ou sur un serveur : docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: gp
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gp}
+      POSTGRES_DB: gp
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gp"]
+      interval: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://gp:${POSTGRES_PASSWORD:-gp}@db:5432/gp
+      ADMIN_NAME: ${ADMIN_NAME:-Administrateur}
+      ADMIN_PHONE: ${ADMIN_PHONE:?Définissez ADMIN_PHONE dans .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans .env}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      # À retirer dès que le site est servi en HTTPS (indispensable en production)
+      ALLOW_INSECURE_COOKIE: ${ALLOW_INSECURE_COOKIE:-1}
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads:/data
+
+volumes:
+  pgdata:
+  uploads:
