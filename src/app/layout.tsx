@@ -9,8 +9,8 @@ import { VerifiedBadge } from "@/components/VerifiedBadge";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Kola · Envoyez vos colis avec un GP de confiance", template: "%s · Kola" },
-  description: "Kola, le colis entre personnes de confiance. Trouvez un GP vérifié pour envoyer vos colis entre la France et l'Afrique.",
+  title: { default: "Lilalink · Envoyez vos colis avec un GP de confiance", template: "%s · Lilalink" },
+  description: "Lilalink, le colis entre personnes de confiance. Trouvez un GP vérifié pour envoyer vos colis entre la France et l'Afrique.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };
@@ -65,8 +65,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <header className="top">
           <div className="brandrow">
             <Link href="/" className="brand">
-              <span className="logo">K</span>
-              <b>Kola</b>
+              <span className="logo">L</span>
+              <b>Lilalink</b>
             </Link>
             {user && (
               <Link href="/compte" className="who-mini">

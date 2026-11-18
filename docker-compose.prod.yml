@@ -1,4 +1,4 @@
-# Production : Kola + PostgreSQL + Caddy (HTTPS automatique) + sauvegardes quotidiennes.
+# Production : Lilalink + PostgreSQL + Caddy (HTTPS automatique) + sauvegardes quotidiennes.
 # Lancement : docker compose -f docker-compose.prod.yml up -d --build
 services:
   db:

@@ -1,7 +1,7 @@
 {
-  "name": "Kola",
-  "short_name": "Kola",
-  "description": "Kola, le colis entre personnes de confiance.",
+  "name": "Lilalink",
+  "short_name": "Lilalink",
+  "description": "Lilalink, le colis entre personnes de confiance.",
   "lang": "fr",
   "start_url": "/",
   "display": "standalone",

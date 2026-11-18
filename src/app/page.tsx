@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
       <form className="card" method="get" action="/">
         <AutoSubmit />
         <h1>Quel GP cherchez-vous ?</h1>
-        <p className="lead">Kola, le colis entre personnes de confiance.</p>
+        <p className="lead">Lilalink, le colis entre personnes de confiance.</p>
         <div className="row">
           <div className="field">
             <label htmlFor="de">Départ</label>

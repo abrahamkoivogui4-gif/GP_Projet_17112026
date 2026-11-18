@@ -1,4 +1,4 @@
-/* Kola : noir et blanc, une colonne étroite, gros boutons, une action principale par écran.
+/* Lilalink : noir et blanc, une colonne étroite, gros boutons, une action principale par écran.
    Seules exceptions à la couleur : le rouge pour les erreurs et refus, le bleu du badge vérifié. */
 :root {
   --bg: #ffffff; --surface: #ffffff; --fg: #000000; --muted: #5f5f5f; --line: #e3e3e3;
