@@ -1,6 +1,6 @@
 "use client";
 import { useActionState } from "react";
-import { decideRequest, postReview } from "@/app/actions";
+import { confirmDelivery, decideRequest, postReview } from "@/app/actions";
 import type { FormState } from "@/app/auth-actions";
 import { SubmitButton } from "./SubmitButton";
 
@@ -58,6 +58,35 @@ export function ReviewForm({ id, gpName }: { id: number; gpName: string }) {
       </div>
       {state.error && <p className="err">{state.error}</p>}
       <SubmitButton>Publier mon avis</SubmitButton>
+    </form>
+  );
+}
+
+export function DeliveryCodeForm({ id, recipient }: { id: number; recipient: string }) {
+  const [state, action] = useActionState<FormState, FormData>(confirmDelivery, {});
+  return (
+    <form action={action} className="codebox">
+      <input type="hidden" name="id" value={id} />
+      <b>Valider la livraison</b>
+      <span>Au moment de la remise, demandez à {recipient} le code de livraison à 6 chiffres et tapez-le ici.</span>
+      <label htmlFor={`code${id}`} className="vh">
+        Code de livraison
+      </label>
+      <input
+        id={`code${id}`}
+        name="code"
+        type="text"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        pattern="[0-9 ]{6,7}"
+        maxLength={7}
+        required
+        placeholder="123 456"
+        className="codeinput"
+      />
+      {state.error && <p className="err">{state.error}</p>}
+      {state.ok && <p className="okmsg">{state.ok}</p>}
+      <SubmitButton pendingText="Vérification…">Valider la livraison</SubmitButton>
     </form>
   );
 }

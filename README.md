@@ -7,6 +7,7 @@ Application web de mise en relation entre **GP** (voyageurs qui transportent des
 - Les GP publient leurs trajets : villes, date, kilos disponibles, **prix au kilo**, **délai de livraison**, **liste d'objets refusés** (modifiable).
 - Les clients cherchent un trajet, voient le total de leur colis, envoient une demande avec une description et discutent avec le GP.
 - Le numéro de téléphone n'est révélé qu'une fois la demande acceptée. Le paiement se fait directement entre eux, hors plateforme.
+- **Code de livraison** : le client indique qui reçoit le colis (nom + téléphone). Quand le GP accepte, le client reçoit un code à 6 chiffres qu'il transmet à son destinataire (bouton WhatsApp prérempli). À la remise, le GP tape le code donné par le destinataire : c'est la seule façon de marquer le colis comme livré. 5 essais maximum, puis le client crée un nouveau code. En cas de litige, l'admin peut valider la livraison sans code.
 - Après livraison, le client note le GP (étoiles + avis).
 - **Badge « GP vérifié »** : le GP envoie sa pièce d'identité, un administrateur la contrôle. La pièce est supprimée après la décision.
 - **Historique** : chaque utilisateur retrouve toutes ses mises en relation passées (« Mes demandes » côté client, « Demandes reçues » côté GP).

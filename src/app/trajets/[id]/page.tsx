@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getUser } from "@/lib/auth";
 import { delayLabel, etaLabel, euros, longDate, shortDate, todayIso } from "@/lib/format";
 import { getGpReviews, getTrip } from "@/lib/queries";
+import { countryCodeForCity } from "@/lib/constants";
 import { ForbiddenList, GpLine, TripRoute } from "@/components/TripCard";
 import { RequestForm } from "@/components/RequestForm";
 import { Stars } from "@/components/Stars";
@@ -63,7 +64,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </Link>
         </div>
       ) : (
-        <RequestForm tripId={t.id} gpName={t.gpName} price={t.pricePerKg} free={free} forbidden={t.forbiddenItems} />
+        <RequestForm tripId={t.id} gpName={t.gpName} price={t.pricePerKg} free={free} forbidden={t.forbiddenItems} defaultCc={countryCodeForCity(t.toCity)} />
       )}
 
       <section className="card">

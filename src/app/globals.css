@@ -189,3 +189,9 @@ textarea { min-height: 96px; resize: vertical; font-size: 1rem; }
 }
 .nav a[aria-current="page"] .count { background: var(--bg); color: var(--fg); }
 .lead { font: 500 1.05rem var(--body); color: var(--muted); margin-top: -6px; }
+
+/* Code de livraison */
+.codebox { border: 2px solid var(--fg); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.codebox > b { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.code { font: 700 2.6rem var(--display); letter-spacing: .12em; font-variant-numeric: tabular-nums; text-align: center; user-select: all; }
+input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-align: center; }

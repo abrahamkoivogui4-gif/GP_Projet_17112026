@@ -7,9 +7,9 @@ import { requireUser } from "@/lib/auth";
 import { loadRequestFor } from "@/lib/requests";
 import { delayLabel, euros, etaLabel, longDate } from "@/lib/format";
 import { formatPhone, whatsappLink } from "@/lib/phone";
-import { cancelRequest, markDelivered } from "@/app/actions";
+import { adminMarkDelivered, cancelRequest, regenerateCode } from "@/app/actions";
 import { Chat } from "@/components/Chat";
-import { DecisionForm, ReviewForm } from "@/components/RequestForms";
+import { DecisionForm, DeliveryCodeForm, ReviewForm } from "@/components/RequestForms";
 import { StatusPill } from "@/components/StatusPill";
 import { Stars } from "@/components/Stars";
 import { TripRoute } from "@/components/TripCard";
@@ -63,6 +63,12 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           </b>
           {r.description || "Pas de description"}
         </div>
+        {r.recipientName && (
+          <p>
+            Destinataire à l&apos;arrivée : <b>{r.recipientName}</b>
+            {(st === "accepted" || st === "delivered") && side !== "client" ? ` · ${formatPhone(r.recipientPhone)}` : ""}
+          </p>
+        )}
         <div className="total">
           <span>
             {r.weightKg} kg × {r.pricePerKg} €
@@ -132,10 +138,66 @@ export default async function Page({ params, searchParams }: { params: Promise<{
             <p className="warn">
               Le paiement se fait directement entre vous. Ne payez jamais la totalité avant d&apos;avoir rencontré l&apos;autre personne, et vérifiez le colis ensemble.
             </p>
-            {side !== "admin" && (
-              <form action={markDelivered}>
+
+            {/* Côté client : le code à transmettre au destinataire */}
+            {side === "client" && (
+              <div className="codebox">
+                <b>Code de livraison</b>
+                {r.deliveryCode ? (
+                  <>
+                    <span className="code" aria-label={`Code ${r.deliveryCode.split("").join(" ")}`}>
+                      {r.deliveryCode.slice(0, 3)} {r.deliveryCode.slice(3)}
+                    </span>
+                    <span>
+                      Transmettez ce code à <b>{r.recipientName || "votre destinataire"}</b>, et à personne d&apos;autre. {gp.name} le lui demandera au moment de la
+                      remise : sans ce code, la livraison ne peut pas être validée.
+                    </span>
+                    {r.recipientPhone && (
+                      <a
+                        className="btn sun small"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={whatsappLink(
+                          r.recipientPhone,
+                          `Bonjour ${r.recipientName}, ${gp.name} va t'apporter un colis de ma part (${t.fromCity} → ${t.toCity}). Quand tu le reçois, donne-lui ce code : ${r.deliveryCode}. Ne le donne à personne d'autre.`,
+                        )}
+                      >
+                        Envoyer le code à {r.recipientName} sur WhatsApp
+                      </a>
+                    )}
+                    {r.codeAttempts >= 5 && <p className="err">Trop d&apos;essais ratés avec ce code. Créez-en un nouveau et redonnez-le au destinataire.</p>}
+                  </>
+                ) : (
+                  <span>Créez votre code et transmettez-le à la personne qui recevra le colis.</span>
+                )}
+                <form action={regenerateCode}>
+                  <input type="hidden" name="id" value={r.id} />
+                  <SubmitButton className="btn alt small">{r.deliveryCode ? "Créer un nouveau code" : "Créer mon code de livraison"}</SubmitButton>
+                </form>
+                {r.deliveryCode && <p className="hint">Si vous créez un nouveau code, l&apos;ancien ne marchera plus.</p>}
+              </div>
+            )}
+
+            {/* Côté GP : contacter le destinataire puis saisir son code */}
+            {side === "gp" && (
+              <>
+                {r.recipientPhone && (
+                  <div className="contact">
+                    <b>Destinataire : {r.recipientName}</b>
+                    <span className="num">{formatPhone(r.recipientPhone)}</span>
+                    <a className="btn sun small" target="_blank" rel="noopener noreferrer" href={whatsappLink(r.recipientPhone)}>
+                      Écrire au destinataire sur WhatsApp
+                    </a>
+                  </div>
+                )}
+                <DeliveryCodeForm id={r.id} recipient={r.recipientName || "le destinataire"} />
+              </>
+            )}
+
+            {side === "admin" && (
+              <form action={adminMarkDelivered}>
                 <input type="hidden" name="id" value={r.id} />
-                <SubmitButton>Le colis est livré</SubmitButton>
+                <SubmitButton className="btn alt small">Marquer comme livré sans code (litige)</SubmitButton>
               </form>
             )}
           </>

@@ -84,6 +84,11 @@ export const requests = pgTable(
     pricePerKg: integer("price_per_kg").notNull(), // prix figé au moment de la demande
     status: requestStatusEnum("status").notNull().default("pending"),
     gpNote: text("gp_note").notNull().default(""),
+    recipientName: text("recipient_name").notNull().default(""), // personne qui reçoit le colis à l'arrivée
+    recipientPhone: text("recipient_phone").notNull().default(""), // format international
+    deliveryCode: text("delivery_code"), // code à 6 chiffres, créé quand le GP accepte
+    codeAttempts: integer("code_attempts").notNull().default(0), // essais de code ratés
+
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     decidedAt: timestamp("decided_at", { withTimezone: true }),
     deliveredAt: timestamp("delivered_at", { withTimezone: true }),

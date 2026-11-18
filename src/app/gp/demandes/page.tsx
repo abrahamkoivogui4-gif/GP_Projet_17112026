@@ -39,6 +39,11 @@ export default async function Page() {
             </b>
             {r.description || "Pas de description"}
           </div>
+          {r.recipientName && (
+            <p className="tag">
+              À remettre à {r.recipientName} à {t.toCity}
+            </p>
+          )}
           <DecisionForm id={r.id} />
           <Link className="btn alt small" href={`/demandes/${r.id}`}>
             Ouvrir la discussion

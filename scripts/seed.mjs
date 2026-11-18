@@ -71,7 +71,7 @@ if (process.argv.includes("--demo")) {
     await q("insert into reviews (request_id, gp_id, client_id, stars, comment) values ($1,$2,$3,5,'Colis remis le jour prévu, très sérieuse.')", [past.rows[0].id, ids[0], clientId]);
     // Une demande en attente
     const pend = await q(
-      "insert into requests (trip_id, client_id, weight_kg, category, description, price_per_kg) values ($1,$2,8,'Alimentaire','Épices et savon, dans un sac fermé.',8) returning id",
+      "insert into requests (trip_id, client_id, weight_kg, category, description, price_per_kg, recipient_name, recipient_phone) values ($1,$2,8,'Alimentaire','Épices et savon, dans un sac fermé.',8,'Fatou Camara','+224620123456') returning id",
       [tripIds[0], clientId2],
     );
     await q("insert into messages (request_id, sender_id, body) values ($1,$2,'Bonjour, je voudrais envoyer 8 kg (alimentaire) avec vous.')", [pend.rows[0].id, clientId2]);

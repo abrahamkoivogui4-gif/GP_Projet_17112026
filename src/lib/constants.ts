@@ -45,6 +45,11 @@ export const COUNTRY_CODES = [
   { code: "+221", label: "Sénégal +221" },
   { code: "+225", label: "Côte d'Ivoire +225" },
   { code: "+223", label: "Mali +223" },
+  { code: "+232", label: "Sierra Leone +232" },
+  { code: "+231", label: "Liberia +231" },
+  { code: "+245", label: "Guinée-Bissau +245" },
+  { code: "+222", label: "Mauritanie +222" },
+  { code: "+226", label: "Burkina Faso +226" },
   { code: "+32", label: "Belgique +32" },
   { code: "+41", label: "Suisse +41" },
   { code: "+34", label: "Espagne +34" },
@@ -55,3 +60,14 @@ export const COUNTRY_CODES = [
 export const MAX_KG = 50;
 export const MAX_PRICE = 50;
 export const SESSION_DAYS = 30;
+
+/** Indicatif téléphonique le plus probable pour une ville (pré-remplit le numéro du destinataire). */
+const CITY_CC: Record<string, string> = {
+  Conakry: "+224", Kankan: "+224", "Labé": "+224", "Nzérékoré": "+224", Kindia: "+224", "Boké": "+224", Mamou: "+224", Siguiri: "+224",
+  Dakar: "+221", Abidjan: "+225", Bamako: "+223", Freetown: "+232", Monrovia: "+231", Bissau: "+245", Nouakchott: "+222", Ouagadougou: "+226",
+  Bruxelles: "+32", "Genève": "+41", Madrid: "+34", Rome: "+39", Londres: "+44",
+};
+export function countryCodeForCity(city: string) {
+  const cc = CITY_CC[city] ?? "+33";
+  return COUNTRY_CODES.some((c) => c.code === cc) ? cc : "+33";
+}

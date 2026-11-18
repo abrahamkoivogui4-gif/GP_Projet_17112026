@@ -1,4 +1,5 @@
 "use server";
+import { randomInt, timingSafeEqual } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -13,6 +14,7 @@ import { getTrip } from "@/lib/queries";
 import { loadRequestFor } from "@/lib/requests";
 import { rateLimit } from "@/lib/rate-limit";
 import { saveUpload } from "@/lib/uploads";
+import { normalizePhone } from "@/lib/phone";
 import type { FormState } from "./auth-actions";
 
 /* ------------------------------------------------------------------ */
@@ -108,6 +110,7 @@ const requestSchema = z.object({
   weightKg: z.coerce.number().int().min(1).max(MAX_KG),
   category: z.enum(CATEGORIES as [string, ...string[]]),
   description: z.string().trim().max(500).default(""),
+  recipientName: z.string().trim().min(2, "Indiquez le nom de la personne qui recevra le colis.").max(60),
   confirm: z.literal("on", { errorMap: () => ({ message: "Confirmez que votre colis ne contient aucun objet refusé." }) }),
 });
 
@@ -115,6 +118,8 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
   const u = await requireUser();
   const parsed = requestSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { error: parsed.error.issues[0].message.startsWith("Invalid") || parsed.error.issues[0].message.startsWith("Expected") ? "Vérifiez votre demande." : parsed.error.issues[0].message };
+  const recipientPhone = normalizePhone(String(fd.get("recipientCc") ?? ""), String(fd.get("recipientPhone") ?? ""));
+  if (!recipientPhone) return { error: "Indiquez un numéro de téléphone valide pour la personne qui recevra le colis." };
   const t = await getTrip(parsed.data.tripId);
   if (!t || t.status !== "active" || t.departureDate < todayIso()) return { error: "Ce trajet n'est plus disponible." };
   if (t.gpId === u.id) return { error: "Vous ne pouvez pas faire une demande sur votre propre trajet." };
@@ -136,6 +141,8 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
       weightKg: parsed.data.weightKg,
       category: parsed.data.category,
       description: parsed.data.description,
+      recipientName: parsed.data.recipientName,
+      recipientPhone,
       pricePerKg: t.pricePerKg,
     })
     .returning({ id: requests.id });
@@ -169,14 +176,17 @@ export async function decideRequest(_: FormState, fd: FormData): Promise<FormSta
     if (row.r.weightKg > free) return { error: `Il ne vous reste que ${free} kg sur ce trajet. Augmentez la place dans « Mes trajets » ou refusez la demande.` };
   }
   const status = p.data.decision === "accept" ? "accepted" : "refused";
-  await db.update(requests).set({ status, gpNote: p.data.note, decidedAt: new Date() }).where(eq(requests.id, row.r.id));
+  await db
+    .update(requests)
+    .set({ status, gpNote: p.data.note, decidedAt: new Date(), ...(status === "accepted" ? { deliveryCode: newCode(), codeAttempts: 0 } : {}) })
+    .where(eq(requests.id, row.r.id));
   if (p.data.note) await db.insert(messages).values({ requestId: row.r.id, senderId: u.id, body: p.data.note });
   const client = await db.query.users.findFirst({ where: eq(users.id, row.r.clientId), columns: { phone: true } });
   if (client)
     await notify(
       client.phone,
       status === "accepted"
-        ? `${u.name} a accepté votre colis pour ${row.t.fromCity} → ${row.t.toCity}. Son numéro est visible dans l'application.`
+        ? `${u.name} a accepté votre colis pour ${row.t.fromCity} → ${row.t.toCity}. Son numéro et votre code de livraison sont dans l'application : transmettez le code à ${row.r.recipientName || "votre destinataire"}.`
         : `${u.name} n'a pas pu accepter votre colis pour ${row.t.fromCity} → ${row.t.toCity}.`,
     );
   revalidatePath(`/demandes/${row.r.id}`);
@@ -192,10 +202,66 @@ export async function cancelRequest(fd: FormData) {
   revalidatePath(`/demandes/${row.r.id}`);
 }
 
-export async function markDelivered(fd: FormData) {
+/* ------------------------------------------------------------------ */
+/* Code de livraison                                                   */
+/* ------------------------------------------------------------------ */
+
+const MAX_CODE_ATTEMPTS = 5;
+
+function newCode() {
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
+}
+
+function sameCode(a: string, b: string) {
+  const x = Buffer.from(a);
+  const y = Buffer.from(b);
+  return x.length === y.length && timingSafeEqual(x, y);
+}
+
+/** Le GP saisit le code donné par le destinataire : c'est la seule façon de marquer le colis comme livré. */
+export async function confirmDelivery(_: FormState, fd: FormData): Promise<FormState> {
+  const u = await requireGp();
+  const row = await loadRequestFor(u, Number(fd.get("id")));
+  if (!row || row.side !== "gp") return { error: "Demande introuvable." };
+  if (row.r.status !== "accepted") return { error: "Cette demande n'attend pas de livraison." };
+  if (!row.r.deliveryCode) return { error: "Le client n'a pas encore de code. Demandez-lui de le créer depuis sa demande." };
+  if (row.r.codeAttempts >= MAX_CODE_ATTEMPTS)
+    return { error: "Trop d'essais. Le client doit créer un nouveau code depuis sa demande, puis le redonner au destinataire." };
+
+  const code = String(fd.get("code") ?? "").replace(/\D/g, "");
+  if (!sameCode(code, row.r.deliveryCode)) {
+    const attempts = row.r.codeAttempts + 1;
+    await db.update(requests).set({ codeAttempts: attempts }).where(eq(requests.id, row.r.id));
+    const left = MAX_CODE_ATTEMPTS - attempts;
+    return {
+      error: left > 0 ? `Code incorrect. Il reste ${left} essai${left > 1 ? "s" : ""}.` : "Code incorrect. Plus d'essai possible : le client doit créer un nouveau code.",
+    };
+  }
+
+  await db.update(requests).set({ status: "delivered", deliveredAt: new Date() }).where(eq(requests.id, row.r.id));
+  const client = await db.query.users.findFirst({ where: eq(users.id, row.r.clientId), columns: { phone: true } });
+  if (client) await notify(client.phone, `Votre colis a été remis à ${row.r.recipientName || "votre destinataire"} par ${u.name}. Pensez à laisser un avis.`);
+  revalidatePath(`/demandes/${row.r.id}`);
+  revalidatePath("/gp/demandes");
+  return { ok: "Livraison confirmée. Merci !" };
+}
+
+/** Le client crée un nouveau code (code perdu, ou trop d'essais ratés). L'ancien ne marche plus. */
+export async function regenerateCode(fd: FormData) {
   const u = await requireUser();
   const row = await loadRequestFor(u, Number(fd.get("id")));
-  if (!row || (row.side !== "client" && row.side !== "gp") || row.r.status !== "accepted") return;
+  if (!row || row.side !== "client" || row.r.status !== "accepted") return;
+  if (!rateLimit(`code:${row.r.id}`, 5, 24 * 3600_000)) return;
+  await db.update(requests).set({ deliveryCode: newCode(), codeAttempts: 0 }).where(eq(requests.id, row.r.id));
+  revalidatePath(`/demandes/${row.r.id}`);
+}
+
+/** Litige : l'admin peut marquer une livraison comme faite sans code. */
+export async function adminMarkDelivered(fd: FormData) {
+  const u = await requireUser();
+  if (u.role !== "admin") return;
+  const row = await loadRequestFor(u, Number(fd.get("id")));
+  if (!row || row.r.status !== "accepted") return;
   await db.update(requests).set({ status: "delivered", deliveredAt: new Date() }).where(eq(requests.id, row.r.id));
   revalidatePath(`/demandes/${row.r.id}`);
 }

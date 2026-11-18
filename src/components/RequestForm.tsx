@@ -2,10 +2,10 @@
 import { useActionState, useState } from "react";
 import { createRequest } from "@/app/actions";
 import type { FormState } from "@/app/auth-actions";
-import { CATEGORIES } from "@/lib/constants";
+import { CATEGORIES, COUNTRY_CODES } from "@/lib/constants";
 import { SubmitButton } from "./SubmitButton";
 
-export function RequestForm(p: { tripId: number; gpName: string; price: number; free: number; forbidden: string[] }) {
+export function RequestForm(p: { tripId: number; gpName: string; price: number; free: number; forbidden: string[]; defaultCc: string }) {
   const [state, action] = useActionState<FormState, FormData>(createRequest, {});
   const [kg, setKg] = useState(Math.min(5, p.free));
   const [ok, setOk] = useState(false);
@@ -54,6 +54,29 @@ export function RequestForm(p: { tripId: number; gpName: string; price: number; 
         <label htmlFor="description">Décrivez votre colis (facultatif)</label>
         <textarea id="description" name="description" maxLength={500} placeholder="Ex. : un sac fermé avec des vêtements et des chaussures, pas de liquide." />
       </div>
+      <fieldset className="field" style={{ border: 0, padding: 0, margin: 0, gap: 10 }}>
+        <legend className="label">Qui reçoit le colis à l&apos;arrivée ?</legend>
+        <p className="hint" style={{ marginTop: 0 }}>
+          Vous recevrez un code de livraison à lui transmettre. Le GP lui demandera ce code au moment de la remise.
+        </p>
+        <div className="field">
+          <label htmlFor="recipientName">Nom du destinataire</label>
+          <input id="recipientName" name="recipientName" type="text" required maxLength={60} placeholder="Ex. Fatou Camara" />
+        </div>
+        <div className="field">
+          <label htmlFor="recipientPhone">Téléphone du destinataire</label>
+          <div className="phone">
+            <select name="recipientCc" aria-label="Indicatif du pays du destinataire" defaultValue={p.defaultCc}>
+              {COUNTRY_CODES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <input id="recipientPhone" name="recipientPhone" type="tel" inputMode="tel" required placeholder="620 12 34 56" />
+          </div>
+        </div>
+      </fieldset>
       {p.forbidden.length > 0 && (
         <div className="note bad">
           <b>{p.gpName} refuse</b>
