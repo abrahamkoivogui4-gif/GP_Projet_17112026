@@ -14,6 +14,7 @@ Application web de mise en relation entre **GP** (voyageurs qui transportent des
 - **Signalements** : clients et GP signalent une mauvaise expérience. L'administration répond, suspend un trajet ou un compte.
 - **Administration** : tableau de bord, vérifications, signalements, trajets, demandes, utilisateurs (dont mot de passe temporaire), avis.
 - Connexion par **numéro de téléphone + mot de passe** (pas de code SMS dans cette version).
+- **Mot de passe oublié** : à la création du compte, un **code de récupération** (XXXX-XXXX-XXXX) est affiché une seule fois. Avec le numéro et ce code, la personne crée un nouveau mot de passe sur `/mot-de-passe-oublie` (5 essais par 15 minutes, code à usage unique : un nouveau est donné après chaque réinitialisation, et les autres appareils sont déconnectés). Depuis « Mon compte », on peut créer un nouveau code. Les comptes créés avant cette fonction n'en ont pas encore : ils en créent un depuis « Mon compte », ou un admin leur donne un mot de passe temporaire.
 - Installable sur l'écran d'accueil du téléphone (PWA), pensée pour les petits écrans et les personnes peu à l'aise avec le smartphone.
 
 ## Technique
@@ -124,5 +125,5 @@ Toutes les notifications (nouvelle demande, acceptation, refus, nouveau message,
 
 - La limite de tentatives de connexion est gardée en mémoire : elle suffit pour un seul serveur. Avec plusieurs serveurs, passez par Redis.
 - La discussion se met à jour toutes les 5 secondes (pas de temps réel).
-- Mot de passe oublié : un admin génère un mot de passe temporaire depuis « Utilisateurs », après avoir vérifié l'identité de la personne.
+- Sans code de récupération, un admin génère un mot de passe temporaire depuis « Utilisateurs », après avoir vérifié l'identité de la personne.
 - Les mentions légales, CGU et la politique de confidentialité restent à rédiger (idéalement avec un avocat) et à ajouter au site.

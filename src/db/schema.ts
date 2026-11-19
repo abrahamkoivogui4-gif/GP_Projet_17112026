@@ -27,6 +27,7 @@ export const users = pgTable(
     name: text("name").notNull(),
     phone: text("phone").notNull(), // format international : +33612345678
     passwordHash: text("password_hash").notNull(),
+    recoveryHash: text("recovery_hash"), // code de récupération (haché) pour réinitialiser le mot de passe
     role: roleEnum("role").notNull().default("client"),
     verification: verificationEnum("verification").notNull().default("none"),
     suspended: boolean("suspended").notNull().default(false),

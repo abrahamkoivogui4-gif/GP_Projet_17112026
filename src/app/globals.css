@@ -78,6 +78,7 @@ input[type=text], input[type=tel], input[type=password], input[type=date], input
   width: 100%; min-height: 56px; border-radius: 14px; border: 2px solid var(--line); background: var(--surface); color: var(--fg); font: 500 1.05rem var(--body); padding: 10px 14px;
 }
 textarea { min-height: 96px; resize: vertical; font-size: 1rem; }
+.codebox { font-family: var(--display); font-size: 1.7rem; font-weight: 700; letter-spacing: .12em; text-align: center; background: var(--soft); border: 2px dashed var(--fg); border-radius: 14px; padding: 18px 10px; user-select: all; overflow-wrap: anywhere; }
 .hint { font-size: .85rem; color: var(--muted); margin-top: 6px; }
 .phone { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px; }
 .check { display: flex; gap: 12px; align-items: flex-start; font-weight: 500; }

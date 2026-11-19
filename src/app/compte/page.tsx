@@ -1,7 +1,11 @@
+import { eq } from "drizzle-orm";
 import { becomeGp, logout } from "@/app/auth-actions";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 import { requireUser } from "@/lib/auth";
 import { formatPhone } from "@/lib/phone";
 import { PasswordForm } from "@/components/PasswordForm";
+import { RecoveryForm } from "@/components/RecoveryForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 
@@ -11,6 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function Page({ searchParams }: { searchParams: Promise<{ devenir?: string }> }) {
   const u = await requireUser("/compte");
   const { devenir } = await searchParams;
+  const row = await db.query.users.findFirst({ where: eq(users.id, u.id), columns: { recoveryHash: true } });
   return (
     <>
       <div className="card">
@@ -35,6 +40,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
         </form>
       )}
       <PasswordForm />
+      <RecoveryForm hasCode={!!row?.recoveryHash} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { login, register, type FormState } from "@/app/auth-actions";
 import { COUNTRY_CODES } from "@/lib/constants";
+import { RecoveryCode } from "./RecoveryCode";
 import { SubmitButton } from "./SubmitButton";
 
 export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: string }) {
@@ -12,6 +13,8 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
   const [role, setRole] = useState(state.values?.role ?? "client");
   const v = state.values ?? {};
   const q = next ? `?suite=${encodeURIComponent(next)}` : "";
+
+  if (state.code) return <RecoveryCode code={state.code} next={state.next} title="Compte créé" />;
 
   return (
     <form action={action} className="card">
@@ -88,9 +91,12 @@ export function AuthForm({ mode, next }: { mode: "login" | "register"; next?: st
       )}
       <SubmitButton>{isR ? "Créer mon compte" : "Me connecter"}</SubmitButton>
       {!isR && (
-        <p className="tag">
-          Mot de passe oublié ? Contactez l&apos;équipe : après vérification de votre identité, un administrateur vous donnera un mot de passe temporaire.
-        </p>
+        <>
+          <Link href="/mot-de-passe-oublie" className="btn alt">
+            Mot de passe oublié ?
+          </Link>
+          <p className="tag">Vous avez votre code de récupération ? Utilisez-le pour créer un nouveau mot de passe.</p>
+        </>
       )}
     </form>
   );
