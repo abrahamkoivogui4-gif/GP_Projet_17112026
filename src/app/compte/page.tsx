@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { eq } from "drizzle-orm";
 import { becomeGp, logout } from "@/app/auth-actions";
 import { db } from "@/db";
@@ -28,6 +29,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
           <dt>Profil</dt>
           <dd>{u.role === "admin" ? "Administrateur" : u.role === "gp" ? "GP" : "Client"}</dd>
         </dl>
+        <Link className="btn alt" href="/alertes">
+          🔔 Mes alertes WhatsApp
+        </Link>
         <form action={logout}>
           <SubmitButton className="btn alt">Se déconnecter</SubmitButton>
         </form>

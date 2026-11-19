@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
 import { sessions, users } from "@/db/schema";
-import { createSession, destroySession, hashPassword, requireUser, verifyPassword } from "@/lib/auth";
+import { createSession, destroySession, hashPassword, requireUser, setMode, switchToAccount, verifyPassword } from "@/lib/auth";
 import { normalizePhone } from "@/lib/phone";
 import { rateLimit } from "@/lib/rate-limit";
 import { newRecoveryCode, normalizeRecoveryCode, RECOVERY_LENGTH } from "@/lib/recovery";
@@ -137,13 +137,34 @@ export async function regenerateRecovery(_: FormState, fd: FormData): Promise<Fo
 }
 
 export async function logout() {
-  await destroySession();
+  const next = await destroySession();
+  // S'il reste un autre compte connecté sur l'appareil, on passe dessus ; sinon retour à la connexion.
+  redirect(next ? (next.role === "admin" ? "/admin" : next.role === "gp" ? "/gp" : "/") : "/connexion");
+}
+
+/** Menu du profil : passer sur un autre compte déjà connecté sur cet appareil. */
+export async function switchAccount(fd: FormData) {
+  const target = await switchToAccount(Number(fd.get("userId")));
+  if (!target) redirect("/connexion?ajout=1");
+  redirect(target.role === "admin" ? "/admin" : target.role === "gp" ? "/gp" : "/");
+}
+
+/** Menu du profil : passer du profil expéditeur au profil GP (et inversement). */
+export async function switchMode(fd: FormData) {
+  const u = await requireUser();
+  if (fd.get("mode") === "gp") {
+    if (u.role === "client") await db.update(users).set({ role: "gp" }).where(eq(users.id, u.id));
+    await setMode("gp");
+    redirect("/gp");
+  }
+  await setMode("client");
   redirect("/");
 }
 
 export async function becomeGp() {
   const u = await requireUser();
   if (u.role === "client") await db.update(users).set({ role: "gp" }).where(eq(users.id, u.id));
+  await setMode("gp");
   redirect("/gp");
 }
 

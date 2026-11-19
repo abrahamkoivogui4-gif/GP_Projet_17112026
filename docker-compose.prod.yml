@@ -27,6 +27,10 @@ services:
       ADMIN_PHONE: ${ADMIN_PHONE:?Définissez ADMIN_PHONE dans .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans .env}
       APP_URL: https://${DOMAIN:?Définissez DOMAIN dans .env}
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_TEMPLATE_NEW_TRIP: ${WHATSAPP_TEMPLATE_NEW_TRIP:-nouveau_trajet}
+      WHATSAPP_TEMPLATE_NOTIFICATION: ${WHATSAPP_TEMPLATE_NOTIFICATION:-}
     expose:
       - "3000" # accessible uniquement par Caddy, pas depuis Internet
     volumes:

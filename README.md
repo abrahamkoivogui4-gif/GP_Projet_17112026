@@ -13,6 +13,10 @@ Application web de mise en relation entre **GP** (voyageurs qui transportent des
 - **Historique** : chaque utilisateur retrouve toutes ses mises en relation passées (« Mes demandes » côté client, « Demandes reçues » côté GP).
 - **Signalements** : clients et GP signalent une mauvaise expérience. L'administration répond, suspend un trajet ou un compte.
 - **Administration** : tableau de bord, vérifications, signalements, trajets, demandes, utilisateurs (dont mot de passe temporaire), avis.
+- **Demande d'envoi sans trajet** : si aucun trajet ne convient, l'expéditeur dépose sa demande (villes, date limite facultative, poids, type, description). Les GP la voient dans « Colis en attente » et proposent un de leurs trajets, ou en publient un. L'expéditeur choisit un GP en un clic : sa demande est déjà remplie.
+- **Alertes WhatsApp** : chacun peut activer une alerte sur un parcours (ou toutes les villes). À chaque nouveau trajet publié, un message WhatsApp part aux personnes concernées (alertes et demandes d'envoi ouvertes, un seul message par personne).
+- **Connexion façon Facebook** : logo et accroche, formulaire simple, « Mot de passe oublié ? », puis « Créer un nouveau compte » en bas.
+- **Icône de profil en haut à droite** : passer du profil Expéditeur au profil GP (le menu change), passer d'un compte à l'autre sur le même téléphone (jusqu'à 5), ajouter un compte, se déconnecter.
 - Connexion par **numéro de téléphone + mot de passe** (pas de code SMS dans cette version).
 - **Mot de passe oublié** : à la création du compte, un **code de récupération** (XXXX-XXXX-XXXX) est affiché une seule fois. Avec le numéro et ce code, la personne crée un nouveau mot de passe sur `/mot-de-passe-oublie` (5 essais par 15 minutes, code à usage unique : un nouveau est donné après chaque réinitialisation, et les autres appareils sont déconnectés). Depuis « Mon compte », on peut créer un nouveau code. Les comptes créés avant cette fonction n'en ont pas encore : ils en créent un depuis « Mon compte », ou un admin leur donne un mot de passe temporaire.
 - Installable sur l'écran d'accueil du téléphone (PWA), pensée pour les petits écrans et les personnes peu à l'aise avec le smartphone.
@@ -117,9 +121,35 @@ Pensez à copier régulièrement le dossier `backups/` hors du serveur (stockage
 
 Tout est dans `src/lib/constants.ts` : villes proposées, objets refusés par défaut, délais de livraison, types de colis, motifs de signalement, indicatifs téléphoniques.
 
-## Brancher WhatsApp ou les SMS plus tard
+## Notifications WhatsApp
 
-Toutes les notifications (nouvelle demande, acceptation, refus, nouveau message, badge validé) passent par `src/lib/notify.ts`. Aujourd'hui elles s'écrivent dans les logs du serveur. Pour envoyer de vrais messages WhatsApp Business ou SMS, il suffit de remplacer le corps de cette fonction.
+Les messages partent par l'**API officielle WhatsApp Business (Cloud API de Meta)**. Sans configuration, rien n'est envoyé : les messages sont écrits dans les logs (`[whatsapp:non-configuré]`), pratique pour tester.
+
+1. Créez une application sur [developers.facebook.com](https://developers.facebook.com), ajoutez le produit **WhatsApp** et un numéro d'envoi (un numéro qui n'est pas déjà utilisé dans l'application WhatsApp).
+2. Créez un **jeton d'accès permanent** (utilisateur système dans le Business Manager) et notez l'**identifiant du numéro** (Phone number ID).
+3. Dans le WhatsApp Manager, créez le modèle de message **`nouveau_trajet`**, catégorie *Utilité*, langue *Français* :
+
+   ```
+   Nouveau trajet Lilalink : {{1}} → {{2}} le {{3}}, {{4}} par kilo. Voir et réserver : {{5}}
+   Pour ne plus recevoir ces messages, désactivez l'alerte dans votre compte Lilalink.
+   ```
+
+4. (Facultatif) Un modèle **`notification`** avec un seul paramètre, pour les autres messages (demande reçue, acceptée, nouveau message…) :
+
+   ```
+   Lilalink : {{1}}
+   ```
+
+5. Renseignez dans `.env` puis relancez :
+
+   ```
+   WHATSAPP_TOKEN=...
+   WHATSAPP_PHONE_NUMBER_ID=...
+   WHATSAPP_TEMPLATE_NEW_TRIP=nouveau_trajet
+   WHATSAPP_TEMPLATE_NOTIFICATION=notification   # laisser vide pour ne pas l'utiliser
+   ```
+
+Meta n'autorise un message à l'initiative de l'entreprise qu'avec un modèle validé (validation en quelques minutes à quelques jours), et facture chaque message selon le pays. Les erreurs d'envoi sont visibles dans les logs (`[whatsapp:erreur]`) et ne bloquent jamais l'utilisateur.
 
 ## Limites connues de cette première version
 

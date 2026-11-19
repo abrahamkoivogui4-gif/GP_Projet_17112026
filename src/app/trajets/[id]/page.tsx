@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { and, eq } from "drizzle-orm";
+import { db } from "@/db";
+import { parcels } from "@/db/schema";
 import { getUser } from "@/lib/auth";
 import { delayLabel, etaLabel, euros, longDate, shortDate, todayIso } from "@/lib/format";
 import { getGpReviews, getTrip } from "@/lib/queries";
@@ -15,13 +18,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return { title: t ? `${t.fromCity} → ${t.toCity} avec ${t.gpName}` : "Trajet" };
 }
 
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ colis?: string }> }) {
   const id = Number((await params).id);
+  const colis = Number((await searchParams).colis) || 0;
   const [t, user] = await Promise.all([getTrip(id || 0), getUser()]);
   if (!t || (t.status !== "active" && t.gpId !== user?.id && user?.role !== "admin")) notFound();
   const reviews = await getGpReviews(t.gpId, 10);
   const free = Math.max(0, t.capacityKg - t.bookedKg);
   const open = t.status === "active" && t.departureDate >= todayIso() && free > 0;
+  // Venu d'une demande d'envoi sans trajet : on pré-remplit le formulaire.
+  const parcel =
+    user && colis
+      ? await db.query.parcels.findFirst({
+          where: and(eq(parcels.id, colis), eq(parcels.clientId, user.id), eq(parcels.status, "open")),
+          columns: { id: true, weightKg: true, category: true, description: true },
+        })
+      : undefined;
+  const back = colis ? `/trajets/${t.id}?colis=${colis}` : `/trajets/${t.id}`;
 
   return (
     <>
@@ -49,10 +62,10 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         <div className="card">
           <h2>Envoyer un colis avec {t.gpName}</h2>
           <p>Connectez-vous ou créez un compte pour envoyer votre demande. C&apos;est gratuit.</p>
-          <Link className="btn" href={`/connexion?suite=/trajets/${t.id}`}>
+          <Link className="btn" href={`/connexion?suite=${encodeURIComponent(back)}`}>
             Se connecter
           </Link>
-          <Link className="btn alt" href={`/inscription?suite=/trajets/${t.id}`}>
+          <Link className="btn alt" href={`/inscription?suite=${encodeURIComponent(back)}`}>
             Créer un compte
           </Link>
         </div>
@@ -64,7 +77,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           </Link>
         </div>
       ) : (
-        <RequestForm tripId={t.id} gpName={t.gpName} price={t.pricePerKg} free={free} forbidden={t.forbiddenItems} defaultCc={countryCodeForCity(t.toCity)} />
+        <RequestForm tripId={t.id} gpName={t.gpName} price={t.pricePerKg} free={free} forbidden={t.forbiddenItems} defaultCc={countryCodeForCity(t.toCity)} parcel={parcel} />
       )}
 
       <section className="card">

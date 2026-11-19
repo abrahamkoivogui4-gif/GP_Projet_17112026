@@ -57,7 +57,7 @@ export function ForbiddenList({ items }: { items: string[] }) {
   );
 }
 
-export function TripCard({ t, action = true }: { t: TripView; action?: boolean }) {
+export function TripCard({ t, action = true, href, label }: { t: TripView; action?: boolean; href?: string; label?: string }) {
   const free = Math.max(0, t.capacityKg - t.bookedKg);
   return (
     <article className="trip">
@@ -83,8 +83,8 @@ export function TripCard({ t, action = true }: { t: TripView; action?: boolean }
       <GpLine name={t.gpName} verified={t.gpVerified} rating={t.rating} count={t.reviewCount} />
       <ForbiddenList items={t.forbiddenItems} />
       {action && (
-        <Link className="btn small" href={`/trajets/${t.id}`}>
-          {free > 0 ? "Voir et demander ce GP" : "Voir le trajet (complet)"}
+        <Link className="btn small" href={href ?? `/trajets/${t.id}`}>
+          {free > 0 ? (label ?? "Voir et demander ce GP") : "Voir le trajet (complet)"}
         </Link>
       )}
     </article>

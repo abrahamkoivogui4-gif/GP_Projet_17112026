@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { count, eq, gte, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { reports, requests, reviews, trips, users, verificationDocs } from "@/db/schema";
+import { parcels, reports, requests, reviews, tripAlerts, trips, users, verificationDocs } from "@/db/schema";
 import { todayIso } from "@/lib/format";
 
 export const metadata = { title: "Administration" };
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const [byStatus, [tripsActive], [usersCount], [gpCount], [rating], [openReports], [pendingDocs], [last7]] = await Promise.all([
+  const [byStatus, [tripsActive], [usersCount], [gpCount], [rating], [openReports], [pendingDocs], [last7], [openParcels], [alerts]] = await Promise.all([
     db.select({ status: requests.status, n: count() }).from(requests).groupBy(requests.status),
     db.select({ n: count() }).from(trips).where(sql`${trips.status} = 'active' and ${trips.departureDate} >= ${todayIso()}`),
     db.select({ n: count() }).from(users),
@@ -17,6 +17,8 @@ export default async function Page() {
     db.select({ n: count() }).from(reports).where(inArray(reports.status, ["new", "in_progress"])),
     db.select({ n: count() }).from(verificationDocs).where(eq(verificationDocs.status, "pending")),
     db.select({ n: count() }).from(requests).where(gte(requests.createdAt, new Date(Date.now() - 7 * 24 * 3600_000))),
+    db.select({ n: count() }).from(parcels).where(eq(parcels.status, "open")),
+    db.select({ n: sql<number>`count(distinct ${tripAlerts.userId})::int` }).from(tripAlerts),
   ]);
   const s = Object.fromEntries(byStatus.map((x) => [x.status, x.n])) as Record<string, number>;
   const total = byStatus.reduce((a, x) => a + x.n, 0);
@@ -62,6 +64,14 @@ export default async function Page() {
             {usersCount.n}
           </b>
           <span>Inscrits dont {gpCount.n} GP</span>
+        </div>
+        <div className="kpi">
+          <b>{openParcels.n}</b>
+          <span>Colis qui attendent un GP</span>
+        </div>
+        <div className="kpi">
+          <b>{alerts.n}</b>
+          <span>Personnes avec une alerte WhatsApp</span>
         </div>
         <Link href={pendingDocs.n ? "/admin/verifications" : "/admin/signalements"} className={`kpi${todo ? " hot" : ""}`} style={{ color: "inherit", textDecoration: "none" }}>
           <b>{todo}</b>

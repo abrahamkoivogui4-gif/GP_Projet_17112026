@@ -2,14 +2,16 @@
 import { randomInt, timingSafeEqual } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
-import { messages, reports, requests, reviews, trips, users, verificationDocs } from "@/db/schema";
+import { messages, parcels, reports, requests, reviews, trips, users, verificationDocs } from "@/db/schema";
 import { requireGp, requireUser, type SessionUser } from "@/lib/auth";
 import { CATEGORIES, CITIES, DELAYS, MAX_KG, MAX_PRICE, REPORT_TYPES, URGENT_REPORT_TYPES } from "@/lib/constants";
 import { shortDate, todayIso } from "@/lib/format";
 import { notify } from "@/lib/notify";
+import { alertNewTrip } from "@/lib/alerts";
 import { getTrip } from "@/lib/queries";
 import { loadRequestFor } from "@/lib/requests";
 import { rateLimit } from "@/lib/rate-limit";
@@ -49,7 +51,10 @@ export async function createTrip(_: FormState, fd: FormData): Promise<FormState>
     .insert(trips)
     .values({ ...parsed.data, gpId: u.id, forbiddenItems: parseForbidden(fd) })
     .returning({ id: trips.id });
+  // Alertes WhatsApp envoyées après la réponse, pour ne pas faire attendre le GP.
+  after(() => alertNewTrip(t.id).catch((e) => console.error("[alertes]", e)));
   revalidatePath("/");
+  revalidatePath("/gp/colis");
   redirect(`/gp/trajets/${t.id}?publie=1`);
 }
 
@@ -146,6 +151,13 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
       pricePerKg: t.pricePerKg,
     })
     .returning({ id: requests.id });
+  // Demande faite à partir d'une demande d'envoi sans trajet : celle-ci est satisfaite.
+  const parcelId = Number(fd.get("parcelId")) || 0;
+  if (parcelId)
+    await db
+      .update(parcels)
+      .set({ status: "matched", requestId: r.id })
+      .where(and(eq(parcels.id, parcelId), eq(parcels.clientId, u.id), eq(parcels.status, "open")));
   await db.insert(messages).values({
     requestId: r.id,
     senderId: u.id,

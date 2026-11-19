@@ -1,19 +1,7 @@
 import { requireGp } from "@/lib/auth";
-import { SubNav } from "@/components/Nav";
 
+// Le menu GP (Mes trajets, Publier, Demandes reçues, Colis en attente) est dans l'en-tête.
 export default async function GpLayout({ children }: { children: React.ReactNode }) {
   await requireGp();
-  return (
-    <>
-      <SubNav
-        items={[
-          { href: "/gp", label: "Mes trajets" },
-          { href: "/gp/publier", label: "Publier un trajet" },
-          { href: "/gp/demandes", label: "Demandes reçues" },
-          { href: "/gp/verification", label: "Badge vérifié" },
-        ]}
-      />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }
