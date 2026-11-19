@@ -9,11 +9,11 @@ import { SubmitButton } from "./SubmitButton";
 
 const STEPS = 8;
 
-export function TripWizard({ today }: { today: string }) {
+export function TripWizard({ today, from: from0 = "", to: to0 = "" }: { today: string; from?: string; to?: string }) {
   const [state, action] = useActionState<FormState, FormData>(createTrip, {});
-  const [step, setStep] = useState(1);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  const [step, setStep] = useState(from0 && to0 ? 3 : from0 ? 2 : 1);
+  const [from, setFrom] = useState(from0);
+  const [to, setTo] = useState(to0);
   const [date, setDate] = useState("");
   const [kg, setKg] = useState(20);
   const [price, setPrice] = useState(8);

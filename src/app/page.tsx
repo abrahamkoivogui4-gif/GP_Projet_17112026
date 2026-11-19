@@ -1,19 +1,42 @@
+import Link from "next/link";
+import { and, eq, isNull } from "drizzle-orm";
+import { db } from "@/db";
+import { tripAlerts } from "@/db/schema";
+import { createAlert } from "@/app/parcel-actions";
+import { getUser } from "@/lib/auth";
 import { searchTrips } from "@/lib/queries";
 import { CITIES } from "@/lib/constants";
 import { todayIso } from "@/lib/format";
 import { TripCard } from "@/components/TripCard";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { AutoSubmit } from "@/components/AutoSubmit";
+import { SubmitButton } from "@/components/SubmitButton";
 
 export const dynamic = "force-dynamic";
 
-type SP = { de?: string; vers?: string; date?: string; verifies?: string; tri?: string };
+type SP = { de?: string; vers?: string; date?: string; verifies?: string; tri?: string; alerte?: string };
 
 export default async function Home({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
   const city = (c?: string) => (c && (CITIES as readonly string[]).includes(c) ? c : "");
   const f = { from: city(sp.de), to: city(sp.vers), date: /^\d{4}-\d{2}-\d{2}$/.test(sp.date ?? "") ? sp.date : "", verified: sp.verifies === "1", sort: sp.tri };
-  const list = await searchTrips(f);
+  const [list, user] = await Promise.all([searchTrips(f), getUser()]);
+  const route = f.from || f.to ? `${f.from || "toutes les villes"} → ${f.to || "toutes les villes"}` : "tous les trajets";
+  const hasAlert = user
+    ? !!(await db.query.tripAlerts.findFirst({
+        where: and(
+          eq(tripAlerts.userId, user.id),
+          f.from ? eq(tripAlerts.fromCity, f.from) : isNull(tripAlerts.fromCity),
+          f.to ? eq(tripAlerts.toCity, f.to) : isNull(tripAlerts.toCity),
+        ),
+        columns: { id: true },
+      }))
+    : false;
+  const q = new URLSearchParams();
+  if (f.from) q.set("de", f.from);
+  if (f.to) q.set("vers", f.to);
+  const here = `/${q.size ? `?${q}` : ""}`;
+  const parcelHref = `/colis/nouveau${q.size ? `?${q}` : ""}`;
 
   return (
     <>
@@ -72,8 +95,59 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
       {list.length ? (
         list.map((t) => <TripCard key={t.id} t={t} />)
       ) : (
-        <div className="card empty">Aucun trajet pour le moment. Changez la ville ou la date.</div>
+        <div className="card">
+          <h2>Aucun trajet pour le moment</h2>
+          <p>Déposez quand même votre demande d&apos;envoi : les GP la voient et vous proposent leur trajet.</p>
+          <Link className="btn" href={parcelHref}>
+            Déposer une demande d&apos;envoi
+          </Link>
+        </div>
+      )}
+
+      <form action={createAlert} className="card wa">
+        <input type="hidden" name="fromCity" value={f.from} />
+        <input type="hidden" name="toCity" value={f.to} />
+        <input type="hidden" name="back" value={here} />
+        <div className="wa-head">
+          <WhatsAppIcon />
+          <div>
+            <h3>Être prévenu sur WhatsApp</h3>
+            <p className="tag">Recevez un message à chaque nouveau trajet : {route}.</p>
+          </div>
+        </div>
+        {sp.alerte || hasAlert ? (
+          <p className="okmsg">
+            ✅ Alerte activée.{" "}
+            <Link href="/alertes" className="tag">
+              Gérer mes alertes
+            </Link>
+          </p>
+        ) : user ? (
+          <SubmitButton className="btn wa-btn">Activer l&apos;alerte WhatsApp</SubmitButton>
+        ) : (
+          <Link className="btn wa-btn" href={`/connexion?suite=${encodeURIComponent(here)}`}>
+            Se connecter pour activer l&apos;alerte
+          </Link>
+        )}
+        <p className="hint">Sur votre numéro de compte. Vous pouvez l&apos;arrêter à tout moment.</p>
+      </form>
+
+      {list.length > 0 && (
+        <Link className="btn alt" href={parcelHref}>
+          Aucun trajet ne convient ? Déposer une demande d&apos;envoi
+        </Link>
       )}
     </>
+  );
+}
+
+function WhatsAppIcon() {
+  return (
+    <span className="wa-ico" aria-hidden>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      </svg>
+    </span>
   );
 }

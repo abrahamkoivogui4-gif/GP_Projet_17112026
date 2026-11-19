@@ -15,6 +15,20 @@
       "when": 1794994725960,
       "tag": "0001_code_livraison",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795046917516,
+      "tag": "0002_code_recuperation",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795093201062,
+      "tag": "0003_colis_alertes",
+      "breakpoints": true
     }
   ]
 }

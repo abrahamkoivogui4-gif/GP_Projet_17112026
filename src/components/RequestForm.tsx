@@ -5,15 +5,19 @@ import type { FormState } from "@/app/auth-actions";
 import { CATEGORIES, COUNTRY_CODES } from "@/lib/constants";
 import { SubmitButton } from "./SubmitButton";
 
-export function RequestForm(p: { tripId: number; gpName: string; price: number; free: number; forbidden: string[]; defaultCc: string }) {
+type Prefill = { id: number; weightKg: number; category: string; description: string };
+
+export function RequestForm(p: { tripId: number; gpName: string; price: number; free: number; forbidden: string[]; defaultCc: string; parcel?: Prefill }) {
   const [state, action] = useActionState<FormState, FormData>(createRequest, {});
-  const [kg, setKg] = useState(Math.min(5, p.free));
+  const [kg, setKg] = useState(Math.min(p.parcel?.weightKg ?? 5, p.free));
   const [ok, setOk] = useState(false);
 
   return (
     <form action={action} className="card">
       <h2>Demander {p.gpName}</h2>
       <input type="hidden" name="tripId" value={p.tripId} />
+      {p.parcel && <input type="hidden" name="parcelId" value={p.parcel.id} />}
+      {p.parcel && <p className="info">Les informations de votre demande d&apos;envoi sont déjà remplies. Vérifiez-les, puis ajoutez le destinataire.</p>}
       <input type="hidden" name="weightKg" value={kg} />
       <div className="field">
         <span className="label">Poids de votre colis</span>
@@ -44,7 +48,7 @@ export function RequestForm(p: { tripId: number; gpName: string; price: number; 
       </div>
       <div className="field">
         <label htmlFor="category">Type de colis</label>
-        <select id="category" name="category" defaultValue="Vêtements">
+        <select id="category" name="category" defaultValue={p.parcel?.category ?? "Vêtements"}>
           {CATEGORIES.map((c) => (
             <option key={c}>{c}</option>
           ))}
@@ -52,7 +56,7 @@ export function RequestForm(p: { tripId: number; gpName: string; price: number; 
       </div>
       <div className="field">
         <label htmlFor="description">Décrivez votre colis (facultatif)</label>
-        <textarea id="description" name="description" maxLength={500} placeholder="Ex. : un sac fermé avec des vêtements et des chaussures, pas de liquide." />
+        <textarea id="description" name="description" maxLength={500} defaultValue={p.parcel?.description} placeholder="Ex. : un sac fermé avec des vêtements et des chaussures, pas de liquide." />
       </div>
       <fieldset className="field" style={{ border: 0, padding: 0, margin: 0, gap: 10 }}>
         <legend className="label">Qui reçoit le colis à l&apos;arrivée ?</legend>

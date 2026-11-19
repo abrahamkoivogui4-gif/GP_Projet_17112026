@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { requests, reviews, trips, users } from "@/db/schema";
 import { todayIso } from "./format";
@@ -55,7 +55,7 @@ function baseTripQuery() {
     .leftJoin(bookedSub, eq(bookedSub.tripId, trips.id));
 }
 
-export async function searchTrips(f: { from?: string; to?: string; date?: string; verified?: boolean; sort?: string }) {
+export async function searchTrips(f: { from?: string; to?: string; date?: string; before?: string; verified?: boolean; sort?: string; excludeGp?: number }) {
   const conds = [
     eq(trips.status, "active"),
     eq(users.suspended, false),
@@ -64,6 +64,8 @@ export async function searchTrips(f: { from?: string; to?: string; date?: string
   if (f.from) conds.push(eq(trips.fromCity, f.from));
   if (f.to) conds.push(eq(trips.toCity, f.to));
   if (f.verified) conds.push(eq(users.verification, "verified"));
+  if (f.before) conds.push(lte(trips.departureDate, f.before));
+  if (f.excludeGp) conds.push(sql`${trips.gpId} <> ${f.excludeGp}`);
   const order =
     f.sort === "prix"
       ? [asc(trips.pricePerKg), asc(trips.departureDate)]
