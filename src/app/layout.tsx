@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 async function header() {
   const [user, mode] = await Promise.all([getUser(), getMode()]);
   const client: NavItem[] = [
-    { href: "/", label: "Trouver un GP" },
+    { href: user ? "/" : "/trajets", label: "Trouver un GP" },
     { href: "/colis/nouveau", label: "Envoyer un colis" },
   ];
   if (!user) return { user, mode, client, gp: undefined, accounts: [] as MenuAccount[] };
@@ -90,7 +90,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body>
-        <HideOnAuth>
+        <HideOnAuth guest={!user}>
           <header className="top">
             <div className="brandrow">
               <Link href={mode === "gp" ? "/gp" : "/"} className="brand">
@@ -110,7 +110,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </header>
         </HideOnAuth>
         <main className="wrap">{children}</main>
-        <HideOnAuth>
+        <HideOnAuth guest={!user}>
           <footer className="foot">
             La plateforme met en relation expéditeurs et GP. Le paiement et la remise du colis se font directement entre vous.
           </footer>

@@ -21,7 +21,7 @@ export function AuthBrand() {
  * Connexion et inscription, organisées comme Facebook :
  * titre, champs simples, gros bouton, « Mot de passe oublié ? », puis « Créer un nouveau compte » en bas.
  */
-export function AuthForm({ mode, next, adding }: { mode: "login" | "register"; next?: string; adding?: boolean }) {
+export function AuthForm({ mode, next, adding, home }: { mode: "login" | "register"; next?: string; adding?: boolean; home?: boolean }) {
   const isR = mode === "register";
   const [state, action] = useActionState<FormState, FormData>(isR ? register : login, {});
   const [show, setShow] = useState(false);
@@ -141,6 +141,11 @@ export function AuthForm({ mode, next, adding }: { mode: "login" | "register"; n
           <Link href="/" className="auth-forgot">
             Annuler
           </Link>
+        )}
+        {home && (
+          <p className="auth-extra">
+            <Link href="/trajets">Voir les trajets</Link> sans créer de compte.
+          </p>
         )}
       </div>
     </div>

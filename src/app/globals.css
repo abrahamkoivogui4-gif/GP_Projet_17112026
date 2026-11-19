@@ -217,6 +217,8 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 .auth-forgot { align-self: center; color: var(--fg); font-weight: 600; text-decoration: none; padding: 10px; min-height: 44px; }
 .auth-forgot:hover { text-decoration: underline; }
 .auth-form + .btn.outline { margin-top: 36px; }
+.auth-extra { text-align: center; font-size: .95rem; color: var(--muted); margin-top: 10px; }
+.auth-extra a { color: var(--fg); font-weight: 700; }
 @media (min-width: 900px) {
   .auth { flex-direction: row; justify-content: space-between; align-items: center; gap: 48px; padding-top: 10vh; }
   .auth-brand { align-items: flex-start; text-align: left; flex: 1; }
