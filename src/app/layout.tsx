@@ -96,7 +96,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Link href={mode === "gp" ? "/gp" : "/"} className="brand">
                 <span className="logo">L</span>
                 <b>Lilalink</b>
-                {mode === "gp" && <span className="mode-tag">GP</span>}
+                {mode === "gp" && <span className="mode-tag">✈️ Je voyage</span>}
               </Link>
               {me ? (
                 <ProfileMenu me={me} mode={mode} others={accounts.filter((a) => a.id !== me.id)} />

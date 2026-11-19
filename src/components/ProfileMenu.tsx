@@ -73,22 +73,22 @@ export function ProfileMenu({ me, mode, others }: { me: MenuAccount; mode: "clie
           </Link>
 
           <div className="pm-sec">
-            <span className="pm-title">Profil utilisé</span>
+            <span className="pm-title">Aujourd&apos;hui, je…</span>
             <div className="pm-modes">
               <form action={switchMode}>
                 <input type="hidden" name="mode" value="client" />
                 <button type="submit" className="pm-mode" aria-pressed={mode === "client"}>
                   <span aria-hidden>📦</span>
-                  <b>Expéditeur</b>
-                  <small>J&apos;envoie des colis</small>
+                  <b>J&apos;envoie</b>
+                  <small>un colis</small>
                 </button>
               </form>
               <form action={switchMode}>
                 <input type="hidden" name="mode" value="gp" />
                 <button type="submit" className="pm-mode" aria-pressed={mode === "gp"}>
                   <span aria-hidden>✈️</span>
-                  <b>GP</b>
-                  <small>{isGp ? "Je transporte" : "Devenir GP"}</small>
+                  <b>Je voyage</b>
+                  <small>{isGp ? "et je transporte" : "Devenir GP"}</small>
                 </button>
               </form>
             </div>
@@ -105,7 +105,7 @@ export function ProfileMenu({ me, mode, others }: { me: MenuAccount; mode: "clie
                     <b>
                       {a.name} {a.verified && <VerifiedBadge size={14} />}
                     </b>
-                    <small>{a.role === "gp" ? "GP" : a.role === "admin" ? "Administrateur" : "Expéditeur"}</small>
+                    <small>{a.role === "gp" ? "✈️ GP" : a.role === "admin" ? "Administrateur" : "📦 Envoie des colis"}</small>
                   </span>
                 </button>
               </form>

@@ -226,7 +226,7 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 }
 
 /* Icône du profil en haut à droite et menu « changer de profil » */
-.mode-tag { border: 2px solid var(--fg); border-radius: 99px; font: 700 .72rem var(--body); padding: 1px 8px; letter-spacing: .05em; }
+.mode-tag { border: 2px solid var(--fg); border-radius: 99px; font: 700 .75rem var(--body); padding: 2px 9px; white-space: nowrap; }
 .pm { position: relative; flex: none; }
 .pm-btn { position: relative; width: 48px; height: 48px; border: 0; padding: 0; background: none; border-radius: 50%; cursor: pointer; display: grid; place-items: center; }
 .pm-avatar { border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-family: var(--display); font-weight: 700; flex: none; letter-spacing: .02em; }
