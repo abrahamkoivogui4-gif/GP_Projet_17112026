@@ -85,14 +85,14 @@ Le fichier `docker-compose.prod.yml` lance tout ce qu'il faut : l'application, P
 4. **Installation** :
 
    ```bash
-   git clone https://github.com/abrahamkoivogui4-gif/GP_Projet_17112026.git kola
-   cd kola
+   git clone https://github.com/abrahamkoivogui4-gif/GP_Projet_17112026.git lilalink
+   cd lilalink
    cp .env.production.example .env
-   nano .env        # DOMAIN, POSTGRES_PASSWORD, ADMIN_PHONE, ADMIN_PASSWORD
+   nano .env        # DOMAIN=lilalink.fr, POSTGRES_PASSWORD, ADMIN_PHONE, ADMIN_PASSWORD
    docker compose -f docker-compose.prod.yml up -d --build
    ```
 
-5. Ouvrez `https://votre-domaine` et connectez-vous avec le compte admin.
+5. Ouvrez `https://lilalink.fr` et connectez-vous avec le compte admin.
 
 **Mettre à jour** après un nouveau commit :
 
