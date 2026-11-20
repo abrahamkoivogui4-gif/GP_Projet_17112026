@@ -7,15 +7,14 @@ import { VerifiedBadge } from "./VerifiedBadge";
 export function TripRoute({ from, to }: { from: string; to: string }) {
   return (
     <div className="route">
+      <span className="pt dot" aria-hidden />
       <div>
-        <small>Ville de départ</small>
+        <small>Départ</small>
         <b>{from}</b>
       </div>
-      <span className="arrow" aria-hidden>
-        →
-      </span>
+      <span className="pt" aria-hidden />
       <div>
-        <small>Destination</small>
+        <small>Arrivée</small>
         <b>{to}</b>
       </div>
     </div>

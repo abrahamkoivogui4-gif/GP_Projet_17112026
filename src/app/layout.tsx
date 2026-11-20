@@ -20,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: "#000000" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };
@@ -58,28 +58,37 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700&display=swap"
         />
       </head>
       <body>
         <header className="top">
-          <div className="brandrow">
+          <div className="topin">
             <Link href="/" className="brand">
-              <span className="logo">L</span>
-              <b>Lilalink</b>
+              Lilalink
             </Link>
-            {user && (
-              <Link href="/compte" className="who-mini">
+            {user ? (
+              <Link href="/compte" className="side who-mini">
                 {user.name.split(" ")[0]}
                 {user.verification === "verified" && <VerifiedBadge size={16} />}
               </Link>
+            ) : (
+              <Link href="/inscription" className="side barbtn">
+                S&apos;inscrire
+              </Link>
             )}
+            <Nav items={items} />
           </div>
-          <Nav items={items} />
         </header>
         <main className="wrap">{children}</main>
         <footer className="foot">
-          La plateforme met en relation expéditeurs et GP. Le paiement et la remise du colis se font directement entre vous.
+          <div className="footin">
+            <Link href="/" className="brand">
+              Lilalink
+            </Link>
+            <p>La plateforme met en relation expéditeurs et GP. Le paiement et la remise du colis se font directement entre vous.</p>
+            <small>© {new Date().getFullYear()} Lilalink</small>
+          </div>
         </footer>
       </body>
     </html>

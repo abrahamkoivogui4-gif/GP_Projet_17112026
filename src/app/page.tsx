@@ -17,63 +17,102 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
   return (
     <>
-      <form className="card" method="get" action="/">
-        <AutoSubmit />
-        <h1>Quel GP cherchez-vous ?</h1>
-        <p className="lead">Lilalink, le colis entre personnes de confiance.</p>
-        <div className="row">
-          <div className="field">
-            <label htmlFor="de">Départ</label>
-            <select id="de" name="de" defaultValue={f.from}>
-              <option value="">Toutes les villes</option>
-              {CITIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
+      <section className="bleed hero">
+        <div className="pagein heroin">
+          <div className="herotext">
+            <h1>Envoyez vos colis avec un GP de confiance</h1>
+            <p className="lead">Entre la France et l&apos;Afrique, avec des voyageurs vérifiés et notés par les expéditeurs.</p>
+            <form className="search" method="get" action="/">
+              <AutoSubmit />
+              <div className="legs">
+                <span className="pt dot" aria-hidden />
+                <select id="de" name="de" defaultValue={f.from} aria-label="Ville de départ">
+                  <option value="">Départ : toutes les villes</option>
+                  {CITIES.map((c) => (
+                    <option key={c} value={c}>
+                      Départ : {c}
+                    </option>
+                  ))}
+                </select>
+                <span className="pt" aria-hidden />
+                <select id="vers" name="vers" defaultValue={f.to} aria-label="Ville d'arrivée">
+                  <option value="">Arrivée : toutes les villes</option>
+                  {CITIES.map((c) => (
+                    <option key={c} value={c}>
+                      Arrivée : {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="row">
+                <div className="field">
+                  <label htmlFor="date">À partir du (facultatif)</label>
+                  <input id="date" name="date" type="date" min={todayIso()} defaultValue={f.date} />
+                </div>
+                <div className="field">
+                  <label htmlFor="tri">Trier par</label>
+                  <select id="tri" name="tri" defaultValue={f.sort ?? "date"}>
+                    <option value="date">Départ le plus tôt</option>
+                    <option value="prix">Prix au kilo le plus bas</option>
+                    <option value="note">Mieux notés</option>
+                  </select>
+                </div>
+              </div>
+              <label className="check">
+                <input type="checkbox" name="verifies" value="1" defaultChecked={f.verified} />
+                <span>
+                  Seulement les GP vérifiés <VerifiedBadge size={20} />
+                </span>
+              </label>
+              <button className="btn auto" type="submit">
+                Voir les trajets
+              </button>
+            </form>
           </div>
-          <div className="field">
-            <label htmlFor="vers">Arrivée</label>
-            <select id="vers" name="vers" defaultValue={f.to}>
-              <option value="">Toutes les villes</option>
-              {CITIES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
-            </select>
-          </div>
+          <aside className="howto" aria-labelledby="howto-title">
+            <h2 id="howto-title">Comment ça marche</h2>
+            <ol>
+              <li>
+                <div>
+                  <b>Choisissez un trajet</b>
+                  <span>Comparez les dates, le prix au kilo et les avis des GP.</span>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <b>Envoyez une demande</b>
+                  <span>Décrivez votre colis et discutez avec le GP. Son numéro s&apos;affiche quand il accepte.</span>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <b>Remise avec un code</b>
+                  <span>Votre destinataire donne un code à 6 chiffres au GP : le colis est livré en toute sécurité.</span>
+                </div>
+              </li>
+            </ol>
+          </aside>
         </div>
-        <div className="row">
-          <div className="field">
-            <label htmlFor="date">À partir du (facultatif)</label>
-            <input id="date" name="date" type="date" min={todayIso()} defaultValue={f.date} />
-          </div>
-          <div className="field">
-            <label htmlFor="tri">Trier par</label>
-            <select id="tri" name="tri" defaultValue={f.sort ?? "date"}>
-              <option value="date">Départ le plus tôt</option>
-              <option value="prix">Prix au kilo le plus bas</option>
-              <option value="note">Mieux notés</option>
-            </select>
-          </div>
-        </div>
-        <label className="check">
-          <input type="checkbox" name="verifies" value="1" defaultChecked={f.verified} />
-          <span>
-            Seulement les GP vérifiés <VerifiedBadge size={20} />
-          </span>
-        </label>
-        <noscript>
-          <button className="btn" type="submit">
-            Chercher
-          </button>
-        </noscript>
-      </form>
+      </section>
 
-      <p className="kicker">{list.length > 1 ? `${list.length} trajets trouvés` : `${list.length} trajet trouvé`}</p>
-      {list.length ? (
-        list.map((t) => <TripCard key={t.id} t={t} />)
-      ) : (
-        <div className="card empty">Aucun trajet pour le moment. Changez la ville ou la date.</div>
-      )}
+      <section className="bleed">
+        <div className="pagein">
+          <div className="reshead">
+            <h2>{list.length > 1 ? `${list.length} trajets trouvés` : `${list.length} trajet trouvé`}</h2>
+          </div>
+          {list.length ? (
+            <div className="results" style={{ marginTop: 16 }}>
+              {list.map((t) => (
+                <TripCard key={t.id} t={t} />
+              ))}
+            </div>
+          ) : (
+            <div className="card empty" style={{ marginTop: 16 }}>
+              Aucun trajet pour le moment. Changez la ville ou la date.
+            </div>
+          )}
+        </div>
+      </section>
     </>
   );
 }
