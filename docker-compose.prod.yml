@@ -42,7 +42,6 @@ services:
       CONTACT_EMAIL: ${CONTACT_EMAIL:-}
       SOCIAL_WHATSAPP: ${SOCIAL_WHATSAPP:-}
       SOCIAL_FACEBOOK: ${SOCIAL_FACEBOOK:-}
-      SOCIAL_INSTAGRAM: ${SOCIAL_INSTAGRAM:-}
       SOCIAL_TIKTOK: ${SOCIAL_TIKTOK:-}
     expose:
       - "3000" # accessible uniquement par Caddy, pas depuis Internet

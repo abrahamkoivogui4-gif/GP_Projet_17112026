@@ -15,10 +15,9 @@ export function siteInfo() {
     publisher: e("PUBLICATION_DIRECTOR") || e("LEGAL_NAME"), // directeur de la publication
     contactEmail: e("CONTACT_EMAIL"),
     socials: [
-      { key: "whatsapp", label: "WhatsApp", url: e("SOCIAL_WHATSAPP") },
       { key: "facebook", label: "Facebook", url: e("SOCIAL_FACEBOOK") },
-      { key: "instagram", label: "Instagram", url: e("SOCIAL_INSTAGRAM") },
       { key: "tiktok", label: "TikTok", url: e("SOCIAL_TIKTOK") },
+      { key: "whatsapp", label: "WhatsApp", url: e("SOCIAL_WHATSAPP") },
     ].filter((s) => /^https:\/\//.test(s.url)),
   };
 }

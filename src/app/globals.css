@@ -343,7 +343,10 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 .banlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; list-style: none; padding: 0 !important; }
 .banlist li { background: var(--dangerbg); color: var(--danger); border-radius: 12px; padding: 12px 14px; font-weight: 600; }
 
-/* Pied de page arrondi : il chevauche légèrement le bas de la page pour que les coins laissent voir le fond au-dessus */
-.foot { position: relative; margin-top: -32px; border-radius: 32px 32px 0 0; }
+/* Pied de page : un rectangle arrondi posé en bas de la page, avec une marge tout autour */
+.foot { position: relative; margin: 0 10px max(10px, env(safe-area-inset-bottom)); border-radius: 28px; padding-bottom: 0; }
 .foot-pills a, .foot-pills span { border-radius: 999px; }
-@media (min-width: 860px) { .foot { border-radius: 44px 44px 0 0; } }
+.shelf:last-child { margin-bottom: -56px; padding-bottom: 50px; }
+/* Quand la page finit par une vitrine grise, le gris continue autour du pied de page */
+body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolute; z-index: -1; top: 0; left: -20px; right: -20px; bottom: -40px; background: var(--shelf); }
+@media (min-width: 860px) { .foot { margin: 0 20px 20px; border-radius: 40px; } }
