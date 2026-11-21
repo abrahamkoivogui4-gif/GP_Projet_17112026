@@ -15,7 +15,7 @@ export function DeleteAccountForm({ isGp }: { isGp: boolean }) {
       {!open ? (
         <>
           <p className="tag">Vous pourrez toujours recréer un compte plus tard avec le même numéro.</p>
-          <button type="button" className="btn no" onClick={() => setOpen(true)}>
+          <button type="button" className="btn danger" onClick={() => setOpen(true)}>
             Supprimer mon compte
           </button>
         </>
@@ -40,7 +40,7 @@ export function DeleteAccountForm({ isGp }: { isGp: boolean }) {
             <span>Je comprends que la suppression est définitive.</span>
           </label>
           {state.error && <p className="err">{state.error}</p>}
-          <SubmitButton className="btn no" disabled={!ok} pendingText="Suppression…">
+          <SubmitButton className="btn danger" disabled={!ok} pendingText="Suppression…">
             Supprimer définitivement mon compte
           </SubmitButton>
           <button type="button" className="link" onClick={() => setOpen(false)}>

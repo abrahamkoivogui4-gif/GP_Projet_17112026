@@ -362,3 +362,6 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 .faq details { border-color: #d2d2d7; }
 .faq { border-color: #d2d2d7; }
 .danger-zone h2 { color: var(--danger); }
+.btn.danger { background: #d70015; border-color: #d70015; color: #fff; }
+.btn.danger:hover:not(:disabled) { background: #b20012; border-color: #b20012; opacity: 1; }
+@media (prefers-color-scheme: dark) { .btn.danger { background: #ff453a; border-color: #ff453a; color: #000; } }
