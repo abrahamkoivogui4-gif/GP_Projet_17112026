@@ -149,4 +149,4 @@ Toutes les notifications (nouvelle demande, acceptation, refus, nouveau message,
 - La limite de tentatives de connexion est gardée en mémoire : elle suffit pour un seul serveur. Avec plusieurs serveurs, passez par Redis.
 - La discussion se met à jour toutes les 5 secondes (pas de temps réel).
 - Sans code de récupération, un admin génère un mot de passe temporaire depuis « Utilisateurs », après avoir vérifié l'identité de la personne.
-- Les mentions légales, CGU et la politique de confidentialité restent à rédiger (idéalement avec un avocat) et à ajouter au site.
+- Les mentions légales, CGU et la politique de confidentialité sont des premières versions : faites-les relire par un juriste. Les informations de l'éditeur (nom, statut, adresse, SIRET, e-mail) se règlent dans `.env` (variables `LEGAL_*`, `CONTACT_EMAIL`) ; tant qu'elles manquent, la page affiche « à compléter » en surligné.

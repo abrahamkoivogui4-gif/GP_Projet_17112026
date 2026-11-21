@@ -33,6 +33,17 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       MAIL_FROM: ${MAIL_FROM:-}
+      # Mentions légales, contact et réseaux sociaux (affichés sur le site)
+      LEGAL_NAME: ${LEGAL_NAME:-}
+      LEGAL_FORM: ${LEGAL_FORM:-}
+      LEGAL_ADDRESS: ${LEGAL_ADDRESS:-}
+      LEGAL_SIRET: ${LEGAL_SIRET:-}
+      PUBLICATION_DIRECTOR: ${PUBLICATION_DIRECTOR:-}
+      CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+      SOCIAL_WHATSAPP: ${SOCIAL_WHATSAPP:-}
+      SOCIAL_FACEBOOK: ${SOCIAL_FACEBOOK:-}
+      SOCIAL_INSTAGRAM: ${SOCIAL_INSTAGRAM:-}
+      SOCIAL_TIKTOK: ${SOCIAL_TIKTOK:-}
     expose:
       - "3000" # accessible uniquement par Caddy, pas depuis Internet
     volumes:

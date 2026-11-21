@@ -7,6 +7,7 @@ import { getUser } from "@/lib/auth";
 import { Nav, type NavItem } from "@/components/Nav";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { Track } from "@/components/Track";
+import { siteInfo } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -25,6 +26,13 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };
+
+const FOOTER: { title: string; links: [string, string][] }[] = [
+  { title: "Lilalink", links: [["/a-propos", "Qui sommes-nous"], ["/comment-ca-marche", "Comment ça marche"], ["/contact", "Nous contacter"]] },
+  { title: "Envoyer un colis", links: [["/", "Trouver un GP"], ["/demandes", "Mes demandes"], ["/objets-interdits", "Objets interdits"]] },
+  { title: "Devenir GP", links: [["/gp/publier", "Publier un trajet"], ["/gp/verification", "Badge GP vérifié"], ["/gp", "Espace GP"]] },
+  { title: "Aide et confiance", links: [["/aide", "Questions fréquentes"], ["/signaler", "Signaler un problème"], ["/confidentialite", "Vos données"]] },
+];
 
 async function navItems(): Promise<{ items: NavItem[]; user: Awaited<ReturnType<typeof getUser>> }> {
   const user = await getUser();
@@ -88,8 +96,44 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/" className="brand">
               Lilalink
             </Link>
-            <p>La plateforme met en relation expéditeurs et GP. Le paiement et la remise du colis se font directement entre vous.</p>
-            <small>© {new Date().getFullYear()} Lilalink</small>
+            <Link href="/aide" className="foot-help">
+              Questions fréquentes et aide
+            </Link>
+            <nav className="foot-cols" aria-label="Plan du site">
+              {FOOTER.map((col) => (
+                <div key={col.title}>
+                  <h2>{col.title}</h2>
+                  <ul>
+                    {col.links.map(([href, label]) => (
+                      <li key={href}>
+                        <Link href={href}>{label}</Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </nav>
+            <div className="foot-row">
+              <div className="foot-pills">
+                {siteInfo().socials.map((s) => (
+                  <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer">
+                    {s.label}
+                  </a>
+                ))}
+              </div>
+              <div className="foot-pills">
+                <span>France ↔ Afrique de l&apos;Ouest</span>
+              </div>
+            </div>
+            <p className="foot-note">
+              La plateforme met en relation expéditeurs et GP. Le paiement et la remise du colis se font directement entre vous.
+            </p>
+            <div className="foot-legal">
+              <small>© {new Date().getFullYear()} Lilalink</small>
+              <Link href="/mentions-legales">Mentions légales</Link>
+              <Link href="/cgu">CGU</Link>
+              <Link href="/confidentialite">Confidentialité</Link>
+            </div>
           </div>
         </footer>
       </body>
