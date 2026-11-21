@@ -11,6 +11,7 @@ import { adminMarkDelivered, cancelRequest, regenerateCode } from "@/app/actions
 import { Chat } from "@/components/Chat";
 import { DecisionForm, DeliveryCodeForm, ReviewForm } from "@/components/RequestForms";
 import { StatusPill } from "@/components/StatusPill";
+import { RequestSteps } from "@/components/RequestSteps";
 import { Stars } from "@/components/Stars";
 import { TripRoute } from "@/components/TripCard";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -42,8 +43,6 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const other = side === "gp" ? client : gp;
   const st = r.status;
   const total = r.weightKg * r.pricePerKg;
-  const ORDER: Record<string, number> = { pending: 0, accepted: 1, delivered: 2 };
-  const reached = (s: string) => (ORDER[st] ?? -1) >= ORDER[s];
 
   return (
     <>
@@ -80,13 +79,17 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           <b>{euros(total)}</b>
         </div>
 
-        {(st === "pending" || st === "accepted" || st === "delivered") && (
-          <div className="status">
-            <span className="on">Demande envoyée</span>
-            <span className={reached("accepted") ? "on" : ""}>Validée</span>
-            <span className={reached("delivered") ? "on" : ""}>Livrée</span>
-          </div>
-        )}
+        <RequestSteps
+          status={st}
+          createdAt={r.createdAt}
+          decidedAt={r.decidedAt}
+          deliveredAt={r.deliveredAt}
+          reviewedAt={review?.createdAt ?? null}
+          gpName={gp.name}
+          side={side}
+          departureDate={t.departureDate}
+          deliveryDays={t.deliveryDays}
+        />
 
         {/* En attente */}
         {st === "pending" && side === "client" && (
