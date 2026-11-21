@@ -36,6 +36,13 @@
       "when": 1795272299250,
       "tag": "0004_notif_email",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795276419251,
+      "tag": "0005_suppression_compte",
+      "breakpoints": true
     }
   ]
 }

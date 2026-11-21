@@ -123,6 +123,9 @@ export default async function Page({ params, searchParams }: { params: Promise<{
                 {r.gpNote}
               </div>
             )}
+            {other.phone.startsWith("supprime-") ? (
+              <p className="note">Cette personne a supprimé son compte : ses coordonnées ne sont plus disponibles.</p>
+            ) : (
             <div className="contact">
               <b>Contact de {other.name}</b>
               <span className="num">{formatPhone(other.phone)}</span>
@@ -131,6 +134,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
                 Écrire sur WhatsApp
               </a>
             </div>
+            )}
           </>
         )}
         {st === "accepted" && (

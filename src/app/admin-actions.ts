@@ -1,6 +1,6 @@
 "use server";
 import { randomInt } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { reports, reviews, sessions, trips, users, verificationDocs } from "@/db/schema";
@@ -57,7 +57,8 @@ export async function setUserSuspended(fd: FormData) {
   const id = num(fd, "id");
   if (id === admin.id) return;
   const suspended = fd.get("suspended") === "1";
-  await db.update(users).set({ suspended }).where(eq(users.id, id));
+  // Un compte supprimé par son titulaire reste bloqué.
+  await db.update(users).set({ suspended }).where(and(eq(users.id, id), isNull(users.deletedAt)));
   if (suspended) await db.delete(sessions).where(eq(sessions.userId, id)); // déconnexion immédiate
   revalidatePath("/admin/utilisateurs");
   revalidatePath("/admin/signalements");
@@ -66,6 +67,8 @@ export async function setUserSuspended(fd: FormData) {
 export async function resetPassword(_: FormState, fd: FormData): Promise<FormState> {
   await requireAdmin();
   const id = num(fd, "id");
+  const target = await db.query.users.findFirst({ where: eq(users.id, id), columns: { deletedAt: true } });
+  if (!target || target.deletedAt) return { error: "Ce compte a été supprimé par son titulaire." };
   const temp = String(randomInt(10_000_000, 99_999_999));
   await db.update(users).set({ passwordHash: await hashPassword(temp) }).where(eq(users.id, id));
   await db.delete(sessions).where(eq(sessions.userId, id));

@@ -33,12 +33,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
       {rows.map((u) => (
         <div className="arow" key={u.id}>
           <div>
-            <b>{u.name}</b> {u.verification === "verified" && <VerifiedBadge />} {u.suspended && <span className="pill suspended">Suspendu</span>}
+            <b>{u.name}</b> {u.verification === "verified" && <VerifiedBadge />} {u.deletedAt ? <span className="pill cancelled">Compte supprimé</span> : u.suspended && <span className="pill suspended">Suspendu</span>}
             <small>
-              {formatPhone(u.phone)} · {u.role === "admin" ? "Admin" : u.role === "gp" ? "GP" : "Client"} · inscrit le {dateTime(u.createdAt)}
+              {u.deletedAt ? "—" : formatPhone(u.phone)} · {u.role === "admin" ? "Admin" : u.role === "gp" ? "GP" : "Client"} · inscrit le {dateTime(u.createdAt)}
             </small>
           </div>
-          {u.id !== me.id && (
+          {u.id !== me.id && !u.deletedAt && (
             <>
               <ResetPasswordButton id={u.id} />
               <form action={setUserSuspended}>

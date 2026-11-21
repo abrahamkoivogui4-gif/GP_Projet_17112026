@@ -71,7 +71,7 @@ export default function Page() {
       <section>
         <h2>Durée de conservation</h2>
         <ul>
-          <li>Les données de votre compte sont conservées tant que votre compte existe.</li>
+          <li>Les données de votre compte sont conservées tant que votre compte existe, et effacées quand vous le supprimez.</li>
           <li>La pièce d&apos;identité est supprimée dès que l&apos;équipe a pris sa décision.</li>
           <li>Les sauvegardes de la base de données sont gardées 14 jours.</li>
         </ul>
@@ -83,7 +83,9 @@ export default function Page() {
           {mail}. Nous pourrons vous demander de prouver votre identité. Vous pouvez aussi saisir la CNIL (cnil.fr).
         </p>
         <p>
-          Pour supprimer votre compte, <Link href="/contact">contactez-nous</Link>.
+          Pour supprimer votre compte : <Link href="/compte">Mon compte</Link> → « Supprimer mon compte ». Votre nom, votre numéro, votre e-mail,
+          votre mot de passe, votre pièce d&apos;identité et les coordonnées de vos destinataires sont effacés. Vos anciens messages et avis restent
+          visibles pour les personnes concernées, sans votre nom.
         </p>
       </section>
     </Doc>

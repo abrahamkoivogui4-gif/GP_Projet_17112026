@@ -361,3 +361,4 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 .legs select:focus, .search input:focus, .search select:focus { border-color: var(--fg); }
 .faq details { border-color: #d2d2d7; }
 .faq { border-color: #d2d2d7; }
+.danger-zone h2 { color: var(--danger); }

@@ -85,7 +85,9 @@ const QA: { q: string; a: React.ReactNode }[] = [
     q: "Comment supprimer mon compte ou mes données ?",
     a: (
       <p>
-        Écrivez-nous depuis la page <Link href="/contact">Nous contacter</Link>. Voir aussi notre <Link href="/confidentialite">politique de confidentialité</Link>.
+        Dans <Link href="/compte">Mon compte</Link>, tout en bas : « Supprimer mon compte ». Votre nom, votre numéro, votre e-mail et votre
+        pièce d&apos;identité sont effacés. Si un envoi validé n&apos;est pas encore livré, terminez-le ou annulez-le d&apos;abord. Voir aussi notre{" "}
+        <Link href="/confidentialite">politique de confidentialité</Link>.
       </p>
     ),
   },

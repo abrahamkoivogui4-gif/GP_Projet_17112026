@@ -8,6 +8,7 @@ import { PasswordForm } from "@/components/PasswordForm";
 import { RecoveryForm } from "@/components/RecoveryForm";
 import { SubmitButton } from "@/components/SubmitButton";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { DeleteAccountForm } from "@/components/DeleteAccountForm";
 
 export const metadata = { title: "Mon compte" };
 export const dynamic = "force-dynamic";
@@ -41,6 +42,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
       )}
       <PasswordForm />
       <RecoveryForm hasCode={!!row?.recoveryHash} />
+      {u.role !== "admin" && <DeleteAccountForm isGp={u.role === "gp"} />}
     </>
   );
 }
