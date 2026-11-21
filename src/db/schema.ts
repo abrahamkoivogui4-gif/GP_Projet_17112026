@@ -31,6 +31,8 @@ export const users = pgTable(
     role: roleEnum("role").notNull().default("client"),
     verification: verificationEnum("verification").notNull().default("none"),
     suspended: boolean("suspended").notNull().default(false),
+    email: text("email"), // facultatif, pour les notifications par e-mail
+    emailNotify: boolean("email_notify").notNull().default(false), // le GP veut un e-mail à chaque nouvelle demande
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_phone_idx").on(t.phone)],

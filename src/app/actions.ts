@@ -2,6 +2,7 @@
 import { randomInt, timingSafeEqual } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
@@ -15,6 +16,7 @@ import { loadRequestFor } from "@/lib/requests";
 import { rateLimit } from "@/lib/rate-limit";
 import { saveUpload } from "@/lib/uploads";
 import { normalizePhone } from "@/lib/phone";
+import { sendNewRequestEmail } from "@/lib/mail";
 import type { FormState } from "./auth-actions";
 
 /* ------------------------------------------------------------------ */
@@ -152,6 +154,19 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
     body: `Bonjour, je voudrais envoyer ${parsed.data.weightKg} kg (${parsed.data.category.toLowerCase()}) avec vous.`,
   });
   await notify(t.gpPhone, `Nouvelle demande de ${u.name} : ${parsed.data.weightKg} kg pour ${t.fromCity} → ${t.toCity}.`);
+  const gp = await db.query.users.findFirst({ where: eq(users.id, t.gpId), columns: { name: true, email: true, emailNotify: true } });
+  if (gp?.emailNotify && gp.email) {
+    const mail = {
+      gpName: gp.name,
+      clientName: u.name,
+      kg: parsed.data.weightKg,
+      route: `${t.fromCity} → ${t.toCity} du ${shortDate(t.departureDate)}`,
+      url: `${process.env.APP_URL ?? ""}/demandes/${r.id}`,
+      settingsUrl: `${process.env.APP_URL ?? ""}/gp#notifications`,
+    };
+    // Envoyé après la réponse au client : une lenteur du serveur d'e-mail ne retarde pas sa demande.
+    after(() => sendNewRequestEmail(gp.email!, mail));
+  }
   revalidatePath("/demandes");
   redirect(`/demandes/${r.id}?envoyee=1`);
 }
@@ -383,3 +398,42 @@ export async function createReport(_: FormState, fd: FormData): Promise<FormStat
   return { ok: "Signalement envoyé. L'équipe vous répondra ici." };
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Notifications par e-mail (GP)                                       */
+/* ------------------------------------------------------------------ */
+
+const emailSchema = z.string().trim().toLowerCase().email().max(120);
+
+export async function saveEmailSettings(_: FormState, fd: FormData): Promise<FormState> {
+  const u = await requireGp();
+  const enabled = fd.get("enabled") === "on";
+  const raw = String(fd.get("email") ?? "").trim();
+  const values = { email: raw };
+  const email = raw ? emailSchema.safeParse(raw) : null;
+  if (email && !email.success) return { error: "Cette adresse e-mail n'est pas valide.", values };
+  if (enabled && !email) return { error: "Indiquez votre adresse e-mail.", values };
+  await db
+    .update(users)
+    .set({ emailNotify: enabled, email: email?.success ? email.data : null })
+    .where(eq(users.id, u.id));
+  revalidatePath("/gp");
+  return { ok: enabled ? "C'est noté : vous recevrez un e-mail à chaque nouvelle demande." : "Notifications par e-mail désactivées." };
+}
+
+export async function sendEmailTest(): Promise<FormState> {
+  const u = await requireGp();
+  if (!rateLimit(`mailtest:${u.id}`, 3, 3600_000)) return { error: "Trop d'essais. Réessayez dans une heure." };
+  const row = await db.query.users.findFirst({ where: eq(users.id, u.id), columns: { name: true, email: true, emailNotify: true } });
+  if (!row?.emailNotify || !row.email) return { error: "Activez d'abord les e-mails et enregistrez." };
+  const res = await sendNewRequestEmail(row.email, {
+    gpName: row.name,
+    clientName: "Client test",
+    kg: 5,
+    route: "Paris → Conakry (e-mail d'essai)",
+    url: `${process.env.APP_URL ?? ""}/gp/demandes`,
+    settingsUrl: `${process.env.APP_URL ?? ""}/gp#notifications`,
+  });
+  if (res.ok) return { ok: `E-mail d'essai envoyé à ${row.email}. Pensez à regarder dans les indésirables.` };
+  return { error: res.error === "non configuré" ? "L'envoi d'e-mails n'est pas encore activé sur Lilalink." : res.error };
+}

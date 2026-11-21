@@ -5,6 +5,10 @@ import { delayLabel, euros, shortDate, todayIso } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
 import { TripRoute } from "@/components/TripCard";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { EmailNotifyForm } from "@/components/EmailNotifyForm";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 
 export const metadata = { title: "Espace GP" };
 export const dynamic = "force-dynamic";
@@ -12,7 +16,10 @@ export const dynamic = "force-dynamic";
 export default async function Page({ searchParams }: { searchParams: Promise<{ annule?: string }> }) {
   const u = await requireGp();
   const { annule } = await searchParams;
-  const list = await getGpTrips(u.id);
+  const [list, me] = await Promise.all([
+    getGpTrips(u.id),
+    db.query.users.findFirst({ where: eq(users.id, u.id), columns: { email: true, emailNotify: true } }),
+  ]);
   const today = todayIso();
   const upcoming = list.filter((t) => t.departureDate >= today && t.status !== "cancelled");
   const past = list.filter((t) => !(t.departureDate >= today && t.status !== "cancelled"));
@@ -55,6 +62,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ a
       <Link className="btn" href="/gp/publier">
         Publier un nouveau trajet
       </Link>
+      <EmailNotifyForm enabled={!!me?.emailNotify} email={me?.email ?? ""} />
 
       <h2>Trajets à venir ({upcoming.length})</h2>
       {upcoming.length ? upcoming.map((t) => <Item key={t.id} t={t} />) : <p className="tag">Aucun trajet à venir.</p>}

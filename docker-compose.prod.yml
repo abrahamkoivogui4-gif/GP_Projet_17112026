@@ -27,6 +27,12 @@ services:
       ADMIN_PHONE: ${ADMIN_PHONE:?Définissez ADMIN_PHONE dans .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans .env}
       APP_URL: https://${DOMAIN:?Définissez DOMAIN dans .env}
+      # Envoi d'e-mails (notifications aux GP) : voir le README
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-}
     expose:
       - "3000" # accessible uniquement par Caddy, pas depuis Internet
     volumes:

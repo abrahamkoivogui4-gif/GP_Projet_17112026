@@ -117,6 +117,29 @@ Pensez à copier régulièrement le dossier `backups/` hors du serveur (stockage
 
 Tout est dans `src/lib/constants.ts` : villes proposées, objets refusés par défaut, délais de livraison, types de colis, motifs de signalement, indicatifs téléphoniques.
 
+## Notifications par e-mail aux GP
+
+Dans « Espace GP », chaque GP peut choisir de recevoir un e-mail à chaque nouvelle demande, avec un bouton « Voir la demande ». Il peut s'envoyer un e-mail d'essai.
+
+Les e-mails partent par **SMTP**, depuis une adresse à votre nom. Le plus simple avec un domaine OVH :
+
+1. Dans l'espace client OVH : **Web Cloud → E-mails**, créez l'adresse `contact@lilalink.fr` (ou `notifications@…`) et choisissez son mot de passe.
+2. Sur le serveur, dans `.env` :
+
+   ```
+   SMTP_HOST=ssl0.ovh.net
+   SMTP_PORT=465
+   SMTP_USER=contact@lilalink.fr
+   SMTP_PASS=le-mot-de-passe-de-la-boite
+   MAIL_FROM=Lilalink <contact@lilalink.fr>
+   ```
+
+3. Relancez : `docker compose -f docker-compose.prod.yml up -d`, puis testez avec « M'envoyer un e-mail d'essai ».
+
+Autre possibilité : un service d'envoi comme Brevo (300 e-mails par jour gratuits) avec ses identifiants SMTP. Sans configuration, aucun e-mail ne part et le message s'écrit seulement dans les logs.
+
+Pour éviter que les e-mails arrivent dans les indésirables, ajoutez dans la zone DNS OVH la signature DKIM proposée par OVH (ou Brevo) pour `lilalink.fr`.
+
 ## Brancher WhatsApp ou les SMS plus tard
 
 Toutes les notifications (nouvelle demande, acceptation, refus, nouveau message, badge validé) passent par `src/lib/notify.ts`. Aujourd'hui elles s'écrivent dans les logs du serveur. Pour envoyer de vrais messages WhatsApp Business ou SMS, il suffit de remplacer le corps de cette fonction.
