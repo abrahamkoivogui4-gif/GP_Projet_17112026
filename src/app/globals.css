@@ -259,7 +259,9 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 /* Vitrine des trajets (page d'accueil) : fond gris clair, grandes cartes blanches, flèches en bas à droite */
 :root { --shelf: #f5f5f7; --tile: #ffffff; --eyebrow: #b64400; --paddle: rgba(210, 210, 215, .64); --paddle-fg: rgba(0, 0, 0, .56); }
 @media (prefers-color-scheme: dark) { :root { --shelf: #111111; --tile: #1d1d1f; --eyebrow: #ff9f45; --paddle: rgba(66, 66, 69, .72); --paddle-fg: rgba(255, 255, 255, .8); } }
-.shelf { background: var(--shelf); padding: 48px 0 40px; margin-bottom: -56px; }
+.shelf { background: var(--shelf); padding: 48px 0 40px; }
+.shelf:last-child { margin-bottom: -56px; }
+.shelf + .shelf { margin-top: -18px; padding-top: 16px; }
 .shelf-title { font: 700 clamp(1.5rem, 4.5vw, 2.1rem) / 1.15 var(--display); letter-spacing: -.02em; margin-bottom: 20px; }
 .shelf-title b { color: var(--fg); }
 .shelf-title span { color: #6e6e73; }
@@ -292,3 +294,11 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 .tile-route svg { flex: none; transition: transform .4s cubic-bezier(0, 0, .5, 1); }
 .tile:hover .tile-route svg { transform: translateX(6px); }
 .tile-foot { margin-top: 0; }
+.tile .eyebrow.calm { color: var(--muted); }
+.fill { display: flex; flex-direction: column; gap: 8px; }
+.fillbar { height: 6px; border-radius: 3px; background: var(--soft2); overflow: hidden; }
+.fillbar i { display: block; height: 100%; background: var(--fg); border-radius: 3px; }
+.tile-more { font-size: .95rem; font-weight: 600; color: var(--verified); border-top: 1px solid var(--line); padding-top: 14px; }
+.tile-new { align-items: flex-start; justify-content: center; background: transparent; box-shadow: none; border: 2px dashed #c7c7cc; }
+.tile-new:hover { background: var(--tile); box-shadow: 2px 4px 16px rgba(0, 0, 0, .12); border-color: transparent; }
+.tile-new .plus { width: 56px; height: 56px; border-radius: 50%; background: var(--fg); color: var(--bg); display: grid; place-items: center; font: 400 2rem/1 var(--body); margin-bottom: 8px; }

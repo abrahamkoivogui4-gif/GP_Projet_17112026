@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { requireGp } from "@/lib/auth";
 import { getGpTrips } from "@/lib/queries";
-import { delayLabel, euros, shortDate, todayIso } from "@/lib/format";
-import { StatusPill } from "@/components/StatusPill";
-import { TripRoute } from "@/components/TripCard";
+import { todayIso } from "@/lib/format";
+import { GpTripTile, NewTripTile } from "@/components/TripTile";
+import { TripRail } from "@/components/TripRail";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { EmailNotifyForm } from "@/components/EmailNotifyForm";
-import { eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { requests, trips, users } from "@/db/schema";
 
 export const metadata = { title: "Espace GP" };
 export const dynamic = "force-dynamic";
@@ -16,28 +16,20 @@ export const dynamic = "force-dynamic";
 export default async function Page({ searchParams }: { searchParams: Promise<{ annule?: string }> }) {
   const u = await requireGp();
   const { annule } = await searchParams;
-  const [list, me] = await Promise.all([
+  const [list, me, pendingRows] = await Promise.all([
     getGpTrips(u.id),
     db.query.users.findFirst({ where: eq(users.id, u.id), columns: { email: true, emailNotify: true } }),
+    db
+      .select({ tripId: requests.tripId, n: count() })
+      .from(requests)
+      .innerJoin(trips, eq(trips.id, requests.tripId))
+      .where(and(eq(trips.gpId, u.id), eq(requests.status, "pending")))
+      .groupBy(requests.tripId),
   ]);
+  const pending = new Map(pendingRows.map((r) => [r.tripId, r.n]));
   const today = todayIso();
   const upcoming = list.filter((t) => t.departureDate >= today && t.status !== "cancelled");
   const past = list.filter((t) => !(t.departureDate >= today && t.status !== "cancelled"));
-
-  const Item = ({ t }: { t: (typeof list)[number] }) => (
-    <article className="trip">
-      <TripRoute from={t.fromCity} to={t.toCity} />
-      <p>
-        <StatusPill kind="trip" status={t.status} /> · départ {shortDate(t.departureDate)} · {t.bookedKg}/{t.capacityKg} kg réservés ·{" "}
-        {euros(t.pricePerKg)}/kg · livraison sous {delayLabel(t.deliveryDays)}
-      </p>
-      {t.status !== "cancelled" && (
-        <Link className="btn alt small" href={`/gp/trajets/${t.id}`}>
-          Modifier (prix, délai, objets refusés)
-        </Link>
-      )}
-    </article>
-  );
 
   return (
     <>
@@ -64,15 +56,21 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ a
       </Link>
       <EmailNotifyForm enabled={!!me?.emailNotify} email={me?.email ?? ""} />
 
-      <h2>Trajets à venir ({upcoming.length})</h2>
-      {upcoming.length ? upcoming.map((t) => <Item key={t.id} t={t} />) : <p className="tag">Aucun trajet à venir.</p>}
+      <TripRail
+        title="Vos prochains départs."
+        subtitle={upcoming.length ? (upcoming.length > 1 ? `${upcoming.length} trajets en ligne.` : "1 trajet en ligne.") : "Aucun trajet en ligne pour l'instant."}
+      >
+        {[...upcoming].reverse().map((t) => (
+          <GpTripTile key={t.id} t={t} pending={pending.get(t.id) ?? 0} />
+        ))}
+        <NewTripTile />
+      </TripRail>
       {past.length > 0 && (
-        <>
-          <h2>Historique ({past.length})</h2>
+        <TripRail title="Historique." subtitle="Vos trajets passés et annulés.">
           {past.map((t) => (
-            <Item key={t.id} t={t} />
+            <GpTripTile key={t.id} t={t} pending={pending.get(t.id) ?? 0} />
           ))}
-        </>
+        </TripRail>
       )}
     </>
   );
