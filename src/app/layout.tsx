@@ -6,6 +6,7 @@ import { reports, requests, trips, verificationDocs } from "@/db/schema";
 import { getUser } from "@/lib/auth";
 import { Nav, type NavItem } from "@/components/Nav";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { Track } from "@/components/Track";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -80,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Nav items={items} />
           </div>
         </header>
+        <Track />
         <main className="wrap">{children}</main>
         <footer className="foot">
           <div className="footin">

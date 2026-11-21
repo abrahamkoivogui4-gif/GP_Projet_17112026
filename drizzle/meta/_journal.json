@@ -22,6 +22,13 @@
       "when": 1795046917516,
       "tag": "0002_code_recuperation",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795270142228,
+      "tag": "0003_visites",
+      "breakpoints": true
     }
   ]
 }

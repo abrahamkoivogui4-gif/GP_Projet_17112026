@@ -167,3 +167,15 @@ export const reports = pgTable("reports", {
 export type User = typeof users.$inferSelect;
 export type Trip = typeof trips.$inferSelect;
 export type Request = typeof requests.$inferSelect;
+
+/** Fréquentation : une ligne par visiteur et par jour. Le visiteur est une empreinte anonyme
+ *  (hachage de l'IP + navigateur + jour + secret serveur) : ni cookie ni IP stockés. */
+export const siteVisits = pgTable(
+  "site_visits",
+  {
+    day: date("day").notNull(),
+    visitor: text("visitor").notNull(),
+    views: integer("views").notNull().default(1),
+  },
+  (t) => [uniqueIndex("site_visits_day_visitor").on(t.day, t.visitor)],
+);

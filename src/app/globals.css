@@ -240,3 +240,20 @@ textarea { min-height: 96px; resize: vertical; font-size: 1rem; }
 .codebox > b { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .code { font: 700 2.6rem var(--display); letter-spacing: .12em; font-variant-numeric: tabular-nums; text-align: center; user-select: all; }
 input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-align: center; }
+
+/* Graphe de fréquentation (admin) */
+.vchart { position: relative; width: 100%; }
+.vchart svg { display: block; overflow: visible; }
+.vchart .grid { stroke: var(--line); stroke-width: 1; }
+.vchart .base { stroke: var(--muted); stroke-width: 1; }
+.vchart .tick { fill: var(--muted); font: 500 11px var(--body); font-variant-numeric: tabular-nums; }
+.vchart .bar { fill: var(--fg); transition: opacity .1s; }
+.vchart .bar.dim { opacity: .35; }
+.vtip { position: absolute; transform: translate(-50%, -100%); pointer-events: none; background: var(--fg); color: var(--bg); border-radius: 8px; padding: 8px 10px; font-size: .85rem; line-height: 1.35; white-space: nowrap; display: flex; flex-direction: column; box-shadow: 0 4px 14px rgba(0,0,0,.18); }
+.vtip b { font-weight: 600; }
+.vtable { width: 100%; border-collapse: collapse; font-size: .92rem; font-variant-numeric: tabular-nums; }
+.vtable th, .vtable td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+.vtable th:first-child, .vtable td:first-child { text-align: left; }
+.vtable th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.vkpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 480px) { .vkpis .kpi { padding: 12px 10px; } .vkpis .kpi b { font-size: 1.45rem; } .vkpis .kpi span { font-size: .78rem; } }
