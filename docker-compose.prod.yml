@@ -27,6 +27,11 @@ services:
       ADMIN_PHONE: ${ADMIN_PHONE:?Définissez ADMIN_PHONE dans .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Définissez ADMIN_PASSWORD dans .env}
       APP_URL: https://${DOMAIN:?Définissez DOMAIN dans .env}
+      # Notifications WhatsApp (facultatif) : voir le README
+      WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+      WHATSAPP_TEMPLATE: ${WHATSAPP_TEMPLATE:-nouvelle_demande}
+      WHATSAPP_TEMPLATE_LANG: ${WHATSAPP_TEMPLATE_LANG:-fr}
     expose:
       - "3000" # accessible uniquement par Caddy, pas depuis Internet
     volumes:

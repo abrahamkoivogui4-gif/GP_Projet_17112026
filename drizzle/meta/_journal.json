@@ -29,6 +29,13 @@
       "when": 1795270142228,
       "tag": "0003_visites",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795271184188,
+      "tag": "0004_notif_whatsapp",
+      "breakpoints": true
     }
   ]
 }

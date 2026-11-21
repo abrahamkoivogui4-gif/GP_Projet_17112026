@@ -117,9 +117,23 @@ Pensez à copier régulièrement le dossier `backups/` hors du serveur (stockage
 
 Tout est dans `src/lib/constants.ts` : villes proposées, objets refusés par défaut, délais de livraison, types de colis, motifs de signalement, indicatifs téléphoniques.
 
-## Brancher WhatsApp ou les SMS plus tard
+## Notifications WhatsApp aux GP
 
-Toutes les notifications (nouvelle demande, acceptation, refus, nouveau message, badge validé) passent par `src/lib/notify.ts`. Aujourd'hui elles s'écrivent dans les logs du serveur. Pour envoyer de vrais messages WhatsApp Business ou SMS, il suffit de remplacer le corps de cette fonction.
+Dans « Espace GP », chaque GP peut choisir de recevoir un WhatsApp à chaque nouvelle demande, sur le numéro de son compte ou sur un autre numéro. Il peut s'envoyer un message d'essai.
+
+Les envois passent par l'**API officielle WhatsApp Business (Meta)**. Tant qu'elle n'est pas configurée, le réglage est enregistré mais rien n'est envoyé (le message apparaît seulement dans les logs). Pour l'activer :
+
+1. Créez un compte sur [business.facebook.com](https://business.facebook.com), puis une application de type « Business » sur [developers.facebook.com](https://developers.facebook.com) avec le produit **WhatsApp**.
+2. Ajoutez un numéro d'envoi (un numéro qui n'est pas déjà utilisé dans l'appli WhatsApp) et notez son **Phone number ID**.
+3. Dans le Gestionnaire WhatsApp, créez un **modèle de message** :
+   - nom : `nouvelle_demande`, catégorie **Utilitaire**, langue **Français** ;
+   - texte : `Nouvelle demande sur Lilalink : {{1}} souhaite envoyer {{2}} kg sur votre trajet {{3}}. Ouvrez la demande pour répondre : {{4}}`
+   - attendez sa validation par Meta (quelques minutes à 24 h).
+4. Créez un **utilisateur système** dans les paramètres Business, donnez-lui accès à l'application et générez un **jeton permanent** avec les droits `whatsapp_business_messaging`.
+5. Ajoutez un moyen de paiement au compte WhatsApp Business : Meta facture chaque message envoyé (tarif selon le pays du destinataire).
+6. Sur le serveur, dans `.env` : `WHATSAPP_TOKEN=…` et `WHATSAPP_PHONE_NUMBER_ID=…`, puis `docker compose -f docker-compose.prod.yml up -d`.
+
+Les autres notifications (acceptation, refus, nouveau message, badge validé) passent par `src/lib/notify.ts` et s'écrivent pour l'instant dans les logs du serveur.
 
 ## Limites connues de cette première version
 

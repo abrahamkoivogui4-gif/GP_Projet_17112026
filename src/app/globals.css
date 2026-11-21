@@ -257,3 +257,4 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 .vtable th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
 .vkpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 480px) { .vkpis .kpi { padding: 12px 10px; } .vkpis .kpi b { font-size: 1.45rem; } .vkpis .kpi span { font-size: .78rem; } }
+.wa { display: flex; flex-direction: column; gap: 14px; }

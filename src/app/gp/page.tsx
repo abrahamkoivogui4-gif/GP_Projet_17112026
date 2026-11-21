@@ -5,6 +5,20 @@ import { delayLabel, euros, shortDate, todayIso } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
 import { TripRoute } from "@/components/TripCard";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
+import { WhatsappForm } from "@/components/WhatsappForm";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { COUNTRY_CODES } from "@/lib/constants";
+import { whatsappConfigured } from "@/lib/whatsapp";
+
+/** +224621000000 -> { cc: "+224", national: "621000000" } */
+function splitPhone(e164: string) {
+  const cc = COUNTRY_CODES.map((c) => c.code)
+    .sort((a, b) => b.length - a.length)
+    .find((c) => e164.startsWith(c));
+  return cc ? { cc, national: e164.slice(cc.length) } : { cc: "+33", national: e164 };
+}
 
 export const metadata = { title: "Espace GP" };
 export const dynamic = "force-dynamic";
@@ -12,7 +26,14 @@ export const dynamic = "force-dynamic";
 export default async function Page({ searchParams }: { searchParams: Promise<{ annule?: string }> }) {
   const u = await requireGp();
   const { annule } = await searchParams;
-  const list = await getGpTrips(u.id);
+  const [list, me] = await Promise.all([
+    getGpTrips(u.id),
+    db.query.users.findFirst({ where: eq(users.id, u.id), columns: { phone: true, whatsappNotify: true, whatsappPhone: true } }),
+  ]);
+  const wa = splitPhone(me?.whatsappPhone || u.phone);
+  const waForm = (
+    <WhatsappForm enabled={!!me?.whatsappNotify} cc={wa.cc} phone={wa.national} configured={whatsappConfigured()} />
+  );
   const today = todayIso();
   const upcoming = list.filter((t) => t.departureDate >= today && t.status !== "cancelled");
   const past = list.filter((t) => !(t.departureDate >= today && t.status !== "cancelled"));
@@ -55,6 +76,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ a
       <Link className="btn" href="/gp/publier">
         Publier un nouveau trajet
       </Link>
+      {waForm}
 
       <h2>Trajets à venir ({upcoming.length})</h2>
       {upcoming.length ? upcoming.map((t) => <Item key={t.id} t={t} />) : <p className="tag">Aucun trajet à venir.</p>}

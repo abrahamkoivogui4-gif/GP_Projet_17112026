@@ -2,6 +2,7 @@
 import { randomInt, timingSafeEqual } from "node:crypto";
 import { and, eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db } from "@/db";
@@ -15,6 +16,7 @@ import { loadRequestFor } from "@/lib/requests";
 import { rateLimit } from "@/lib/rate-limit";
 import { saveUpload } from "@/lib/uploads";
 import { normalizePhone } from "@/lib/phone";
+import { sendNewRequestWhatsapp } from "@/lib/whatsapp";
 import type { FormState } from "./auth-actions";
 
 /* ------------------------------------------------------------------ */
@@ -152,6 +154,17 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
     body: `Bonjour, je voudrais envoyer ${parsed.data.weightKg} kg (${parsed.data.category.toLowerCase()}) avec vous.`,
   });
   await notify(t.gpPhone, `Nouvelle demande de ${u.name} : ${parsed.data.weightKg} kg pour ${t.fromCity} → ${t.toCity}.`);
+  const gp = await db.query.users.findFirst({ where: eq(users.id, t.gpId), columns: { phone: true, whatsappNotify: true, whatsappPhone: true } });
+  if (gp?.whatsappNotify) {
+    const params = {
+      clientName: u.name,
+      kg: parsed.data.weightKg,
+      route: `${t.fromCity} → ${t.toCity} du ${shortDate(t.departureDate)}`,
+      url: `${process.env.APP_URL ?? ""}/demandes/${r.id}`,
+    };
+    // Envoyé après la réponse au client : une lenteur de WhatsApp ne retarde pas sa demande.
+    after(() => sendNewRequestWhatsapp(gp.whatsappPhone || gp.phone, params));
+  }
   revalidatePath("/demandes");
   redirect(`/demandes/${r.id}?envoyee=1`);
 }
@@ -383,3 +396,36 @@ export async function createReport(_: FormState, fd: FormData): Promise<FormStat
   return { ok: "Signalement envoyé. L'équipe vous répondra ici." };
 }
 
+
+/* ------------------------------------------------------------------ */
+/* Notifications WhatsApp (GP)                                         */
+/* ------------------------------------------------------------------ */
+
+export async function saveWhatsappSettings(_: FormState, fd: FormData): Promise<FormState> {
+  const u = await requireGp();
+  const enabled = fd.get("enabled") === "on";
+  const values = { cc: String(fd.get("cc") ?? ""), phone: String(fd.get("phone") ?? "") };
+  const phone = normalizePhone(values.cc, values.phone);
+  if (enabled && !phone) return { error: "Indiquez un numéro WhatsApp valide.", values };
+  await db
+    .update(users)
+    .set({ whatsappNotify: enabled, whatsappPhone: phone && phone !== u.phone ? phone : null })
+    .where(eq(users.id, u.id));
+  revalidatePath("/gp");
+  return { ok: enabled ? "C'est noté : vous recevrez un WhatsApp à chaque nouvelle demande." : "Notifications WhatsApp désactivées." };
+}
+
+export async function sendWhatsappTest(): Promise<FormState> {
+  const u = await requireGp();
+  if (!rateLimit(`watest:${u.id}`, 3, 3600_000)) return { error: "Trop d'essais. Réessayez dans une heure." };
+  const row = await db.query.users.findFirst({ where: eq(users.id, u.id), columns: { phone: true, whatsappNotify: true, whatsappPhone: true } });
+  if (!row?.whatsappNotify) return { error: "Activez d'abord les notifications WhatsApp et enregistrez." };
+  const res = await sendNewRequestWhatsapp(row.whatsappPhone || row.phone, {
+    clientName: "Client test",
+    kg: 5,
+    route: "Paris → Conakry (message d'essai)",
+    url: `${process.env.APP_URL ?? ""}/gp/demandes`,
+  });
+  if (res.ok) return { ok: "Message d'essai envoyé. Regardez votre WhatsApp." };
+  return { error: res.error === "non configuré" ? "Les envois WhatsApp ne sont pas encore activés sur Lilalink. Votre réglage est bien enregistré." : res.error };
+}
