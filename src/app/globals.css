@@ -70,11 +70,8 @@ p { margin: 0; }
 .howto li::before { content: counter(s); width: 40px; height: 40px; border-radius: 50%; background: var(--fg); color: var(--bg); display: grid; place-items: center; font: 700 1.05rem var(--display); }
 .howto b { display: block; font-family: var(--display); font-size: 1.1rem; }
 .howto span { color: var(--muted); font-size: .95rem; }
-.results { display: grid; gap: 16px; }
-.reshead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 24px; }
 @media (min-width: 860px) {
   .heroin { grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 56px; padding-top: 24px; }
-  .results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Cartes et blocs */
@@ -258,3 +255,17 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 .vkpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 480px) { .vkpis .kpi { padding: 12px 10px; } .vkpis .kpi b { font-size: 1.45rem; } .vkpis .kpi span { font-size: .78rem; } }
 .stack { display: flex; flex-direction: column; gap: 14px; }
+
+/* Trajets qui défilent horizontalement (page d'accueil) */
+.railhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 0 14px; }
+.railnav { display: flex; gap: 8px; flex: none; }
+.railnav button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--soft); color: var(--fg); font: 600 1.2rem var(--body); cursor: pointer; display: grid; place-items: center; }
+.railnav button:hover:not(:disabled) { background: var(--soft2); }
+.railnav button:disabled { opacity: .35; cursor: default; }
+.rail { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; overscroll-behavior-x: contain; margin-inline: -16px; padding: 4px 16px 20px; scrollbar-width: thin; }
+.rail > * { flex: 0 0 min(340px, 84%); scroll-snap-align: start; }
+.rail .trip .btn { margin-top: auto; }
+.rail:focus-visible { outline: 3px solid var(--fg); outline-offset: -3px; border-radius: 16px; }
+@media (min-width: 1168px) { .rail { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; } }
+.rail .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.rail .fields b { white-space: normal; }

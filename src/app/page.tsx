@@ -4,6 +4,7 @@ import { todayIso } from "@/lib/format";
 import { TripCard } from "@/components/TripCard";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { AutoSubmit } from "@/components/AutoSubmit";
+import { TripRail } from "@/components/TripRail";
 
 export const dynamic = "force-dynamic";
 
@@ -97,19 +98,19 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
 
       <section className="bleed">
         <div className="pagein">
-          <div className="reshead">
-            <h2>{list.length > 1 ? `${list.length} trajets trouvés` : `${list.length} trajet trouvé`}</h2>
-          </div>
           {list.length ? (
-            <div className="results" style={{ marginTop: 16 }}>
+            <TripRail title={list.length > 1 ? `${list.length} trajets trouvés` : "1 trajet trouvé"}>
               {list.map((t) => (
                 <TripCard key={t.id} t={t} />
               ))}
-            </div>
+            </TripRail>
           ) : (
-            <div className="card empty" style={{ marginTop: 16 }}>
-              Aucun trajet pour le moment. Changez la ville ou la date.
-            </div>
+            <>
+              <div className="railhead">
+                <h2>Aucun trajet trouvé</h2>
+              </div>
+              <div className="card empty">Aucun trajet pour le moment. Changez la ville ou la date.</div>
+            </>
           )}
         </div>
       </section>
