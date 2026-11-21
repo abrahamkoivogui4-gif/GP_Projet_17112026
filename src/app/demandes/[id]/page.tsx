@@ -86,6 +86,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           deliveredAt={r.deliveredAt}
           reviewedAt={review?.createdAt ?? null}
           gpName={gp.name}
+          recipientName={r.recipientName}
           side={side}
           departureDate={t.departureDate}
           deliveryDays={t.deliveryDays}

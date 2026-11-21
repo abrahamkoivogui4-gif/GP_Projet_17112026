@@ -366,30 +366,33 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 .btn.danger:hover:not(:disabled) { background: #b20012; border-color: #b20012; opacity: 1; }
 @media (prefers-color-scheme: dark) { .btn.danger { background: #ff453a; border-color: #ff453a; color: #000; } }
 
-/* Barre d'étapes d'une demande */
-.rsteps { background: var(--soft); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-.rsteps-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.rsteps-head b { font-family: var(--display); font-size: 1.1rem; }
-.rsteps-head span { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
-.rsteps-bar { display: flex; gap: 4px; }
-.rsteps-bar i { flex: 1; height: 6px; border-radius: 3px; background: var(--soft2); }
-.rsteps-bar i.done { background: #1a7f37; }
-.rsteps-bar i.current { background: linear-gradient(90deg, var(--fg) 50%, var(--soft2) 50%); }
-.rsteps-bar i.stopped { background: var(--danger); }
-.rsteps ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
-.rsteps li { display: grid; grid-template-columns: 32px 1fr; gap: 12px; position: relative; padding-bottom: 16px; }
-.rsteps li:last-child { padding-bottom: 0; }
-.rsteps li:not(:last-child)::before { content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--soft2); }
-.rsteps li.done:not(:last-child)::before { background: #1a7f37; }
-.rdot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font: 700 .9rem var(--display); background: var(--surface); color: var(--muted); border: 2px solid var(--soft2); }
-.rsteps li.done .rdot { background: #1a7f37; border-color: #1a7f37; color: #fff; }
-.rsteps li.current .rdot { background: var(--fg); border-color: var(--fg); color: var(--bg); }
-.rsteps li.stopped .rdot { background: var(--danger); border-color: var(--danger); color: #fff; }
-.rtitle { font-weight: 600; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 4px; }
-.rsteps li.todo .rtitle { color: var(--muted); }
-.rsteps li.stopped .rtitle { color: var(--danger); }
-.rnow { font-size: .72rem; font-weight: 700; background: var(--fg); color: var(--bg); border-radius: 99px; padding: 2px 8px; }
-.rdate { color: #1a7f37; font-size: .85rem; font-weight: 600; }
-.rsteps li.stopped .rdate { color: var(--danger); }
-.rdetail { color: var(--muted); font-size: .9rem; line-height: 1.45; }
-@media (prefers-color-scheme: dark) { .rsteps-bar i.done, .rsteps li.done .rdot, .rsteps li.done:not(:last-child)::before { background: #2ea043; border-color: #2ea043; } .rdate { color: #3fb950; } }
+/* Suivi d'une demande, façon suivi de colis */
+.track { --ok: #1a8f3c; border-radius: 20px; padding: 20px 18px 18px; display: flex; flex-direction: column; gap: 22px; background: var(--soft); }
+.track.t-go { background: #eef6ff; }
+.track.t-party { background: #eaf7ee; }
+.track.t-sad { background: var(--dangerbg); }
+.track-hero { display: flex; gap: 14px; align-items: flex-start; }
+.track-emoji { font-size: 2rem; line-height: 1; width: 52px; height: 52px; border-radius: 16px; background: var(--surface); display: grid; place-items: center; flex: none; box-shadow: 0 2px 8px rgba(0, 0, 0, .06); }
+.track.t-party .track-emoji { animation: hop 1.2s ease-in-out 2; }
+.track-title { font: 700 1.25rem/1.2 var(--display); letter-spacing: -.01em; }
+.track-text { color: var(--muted); font-size: .95rem; line-height: 1.45; margin-top: 4px; }
+.track-line { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); position: relative; }
+.track-line::before, .track-line::after { content: ""; position: absolute; top: 21px; height: 4px; border-radius: 2px; left: calc(50% / var(--n)); }
+.track-line::before { right: calc(50% / var(--n)); background: var(--soft2); }
+.track-line::after { width: calc((100% - 100% / var(--n)) * var(--pct) / 100); background: var(--ok); transition: width .6s ease; }
+.track.t-sad .track-line::after { background: linear-gradient(90deg, var(--ok), var(--danger)); }
+.track-line li { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; position: relative; z-index: 1; }
+.track-dot { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: #b0b0b5; border: 3px solid var(--soft2); }
+.track-line li.done .track-dot { background: var(--ok); border-color: var(--ok); color: #fff; }
+.track-line li.current .track-dot { background: var(--fg); border-color: var(--fg); color: var(--bg); animation: pulse 1.8s ease-out infinite; }
+.track-line li.stopped .track-dot { background: var(--danger); border-color: var(--danger); color: #fff; }
+.track-label { font-size: .78rem; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; padding: 0 2px; }
+.track-line li.todo .track-label { color: var(--muted); font-weight: 600; }
+.track-date { font-size: .75rem; color: var(--muted); min-height: 1em; }
+.track-line li.done .track-date { color: var(--ok); font-weight: 600; }
+.track-line li.current .track-date { color: var(--fg); font-weight: 600; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0, 0, 0, .35); } 70% { box-shadow: 0 0 0 12px rgba(0, 0, 0, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); } }
+@keyframes hop { 0%, 100% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-8px) rotate(-8deg); } 60% { transform: translateY(0) rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { .track-line li.current .track-dot, .track.t-party .track-emoji { animation: none; } .track-line::after { transition: none; } }
+@media (prefers-color-scheme: dark) { .track { --ok: #2ea043; } .track.t-go { background: #0f1d2e; } .track.t-party { background: #0f2416; } }
+@media (max-width: 480px) { .track-dot { width: 40px; height: 40px; } .track-line::before, .track-line::after { top: 18px; } .track-label { font-size: .7rem; letter-spacing: -.01em; } .track-date { font-size: .68rem; } }

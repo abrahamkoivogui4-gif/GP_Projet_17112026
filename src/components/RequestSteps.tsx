@@ -1,10 +1,36 @@
-import { dateTime, etaLabel } from "@/lib/format";
+import { etaLabel } from "@/lib/format";
 
-type Step = { title: string; detail: string; state: "done" | "current" | "todo" | "stopped"; at?: Date | null };
+type State = "done" | "current" | "todo" | "stopped";
+type Step = { key: string; label: string; state: State; at?: Date | null };
+
+const day = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
+
+/** Petites icônes dessinées (traits arrondis), lisibles à toutes les tailles. */
+function Icon({ name }: { name: string }) {
+  const p = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  const paths: Record<string, React.ReactNode> = {
+    send: <path {...p} d="M4 12l16-7-6 16-3-7-7-2zM11 14l9-9" />,
+    ok: <path {...p} d="M5 12.5l4.5 4.5L19 7.5" />,
+    hand: (
+      <>
+        <rect {...p} x="4" y="8" width="16" height="11" rx="2" />
+        <path {...p} d="M4 12h16M12 8v11M9 8c-2-3 1-5 3 0 2-5 5-3 3 0" />
+      </>
+    ),
+    home: <path {...p} d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z" />,
+    star: <path {...p} d="M12 4l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 19.2 8 13.7 4 9.8l5.5-.8z" />,
+    stop: <path {...p} d="M7 7l10 10M17 7L7 17" />,
+  };
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
+      {paths[name]}
+    </svg>
+  );
+}
 
 /**
- * Barre d'étapes d'une demande : ce qui est fait (avec la date), l'étape en cours, ce qui reste.
- * Une demande refusée ou annulée s'arrête sur une étape rouge.
+ * Suivi d'une demande, façon suivi de colis : un message clair sur l'étape en cours,
+ * un parcours avec une icône par étape (vert = fait, noir qui pulse = en cours) et la date de chaque validation.
  */
 export function RequestSteps({
   status,
@@ -13,6 +39,7 @@ export function RequestSteps({
   deliveredAt,
   reviewedAt,
   gpName,
+  recipientName,
   side,
   departureDate,
   deliveryDays,
@@ -23,85 +50,80 @@ export function RequestSteps({
   deliveredAt: Date | null;
   reviewedAt: Date | null;
   gpName: string;
+  recipientName: string;
   side: "client" | "gp" | "admin";
   departureDate: string;
   deliveryDays: number;
 }) {
   const you = side === "client";
-  const steps: Step[] = [{ title: "Demande envoyée", detail: you ? "Votre demande est arrivée chez le GP." : "Le client a envoyé sa demande.", state: "done", at: createdAt }];
+  const gpFirst = gpName.split(" ")[0];
+  const to = recipientName ? recipientName.split(" ")[0] : "Le destinataire";
+  const accepted = status === "accepted" || status === "delivered";
+  const delivered = status === "delivered";
+  const stopped = status === "refused" || status === "cancelled";
 
-  if (status === "refused" || status === "cancelled") {
-    steps.push({
-      title: status === "refused" ? `Refusée par ${gpName}` : "Demande annulée",
-      detail: status === "refused" ? "Vous pouvez chercher un autre GP sur le même trajet." : "Cette demande n'est plus active.",
-      state: "stopped",
-      at: decidedAt,
-    });
-  } else {
-    const accepted = status === "accepted" || status === "delivered";
-    const delivered = status === "delivered";
-    steps.push({
-      title: accepted ? `Acceptée par ${gpName}` : `Réponse de ${gpName}`,
-      detail: accepted
-        ? you
-          ? "Vous avez reçu le code de livraison. Le numéro du GP est visible."
-          : "Le code de livraison a été envoyé au client."
-        : you
-          ? "Le GP lit votre demande. Vous serez prévenu de sa réponse."
-          : "À vous d'accepter ou de refuser.",
-      state: accepted ? "done" : "current",
-      at: accepted ? decidedAt : null,
-    });
-    steps.push({
-      title: "Remise du colis au GP",
-      detail: "Vous vous retrouvez pour la remise et le paiement, au prix convenu.",
-      state: delivered ? "done" : accepted ? "current" : "todo",
-      at: null,
-    });
-    steps.push({
-      title: "Livré au destinataire",
-      detail: delivered
-        ? "Le destinataire a donné le bon code au GP."
-        : `Le destinataire donne le code à 6 chiffres au GP. Prévu au plus tard le ${etaLabel(departureDate, deliveryDays)}.`,
-      state: delivered ? "done" : "todo",
-      at: deliveredAt,
-    });
-    steps.push({
-      title: "Avis",
-      detail: reviewedAt ? "Merci pour votre avis !" : you ? "Notez le GP pour aider les autres expéditeurs." : "Le client peut laisser un avis.",
-      state: reviewedAt ? "done" : delivered ? "current" : "todo",
-      at: reviewedAt,
-    });
+  const steps: Step[] = stopped
+    ? [
+        { key: "send", label: "Envoyée", state: "done", at: createdAt },
+        { key: "stop", label: status === "refused" ? "Refusée" : "Annulée", state: "stopped", at: decidedAt },
+      ]
+    : [
+        { key: "send", label: "Envoyée", state: "done", at: createdAt },
+        { key: "ok", label: accepted ? "Acceptée" : "Réponse", state: accepted ? "done" : "current", at: accepted ? decidedAt : null },
+        { key: "hand", label: "Remise", state: delivered ? "done" : accepted ? "current" : "todo" },
+        { key: "home", label: "Livrée", state: delivered ? "done" : "todo", at: deliveredAt },
+        { key: "star", label: "Avis", state: reviewedAt ? "done" : delivered ? "current" : "todo", at: reviewedAt },
+      ];
+
+  // Le grand message : ce qui se passe maintenant, et quoi faire.
+  let mood: "wait" | "go" | "party" | "sad" = "wait";
+  let title = "";
+  let text = "";
+  if (status === "refused") {
+    mood = "sad";
+    title = you ? `${gpFirst} ne peut pas prendre votre colis` : "Demande refusée";
+    text = you ? "Pas de souci : d'autres GP font peut-être le même trajet." : "Le client a été prévenu.";
+  } else if (status === "cancelled") {
+    mood = "sad";
+    title = "Demande annulée";
+    text = "Cette demande n'est plus active.";
+  } else if (status === "pending") {
+    title = you ? `En attente de ${gpFirst}` : "Nouvelle demande pour vous";
+    text = you ? "Votre demande est bien arrivée. Vous serez prévenu dès sa réponse." : "Lisez la demande puis acceptez ou refusez.";
+  } else if (status === "accepted") {
+    mood = "go";
+    title = you ? `${gpFirst} a accepté votre colis !` : "Vous avez accepté ce colis";
+    text = you
+      ? `Retrouvez ${gpFirst} pour lui remettre le colis. Livraison prévue au plus tard le ${etaLabel(departureDate, deliveryDays)}.`
+      : `À la remise, demandez le code à 6 chiffres à ${to}. Livraison au plus tard le ${etaLabel(departureDate, deliveryDays)}.`;
+  } else if (delivered) {
+    mood = "party";
+    title = you ? `Livré ! ${to} a bien reçu le colis` : "Colis livré, bravo !";
+    text = reviewedAt ? "Merci pour votre avis." : you ? `Un petit avis pour ${gpFirst} ? Ça aide les autres expéditeurs.` : "Le client peut maintenant vous laisser un avis.";
   }
 
-  const doneCount = steps.filter((s) => s.state === "done").length;
+  const done = steps.filter((s) => s.state === "done").length;
+  const pct = stopped ? 100 : Math.round(((done - 1 + (steps.some((s) => s.state === "current") ? 0.5 : 0)) / (steps.length - 1)) * 100);
+
   return (
-    <section className="rsteps" aria-label="Avancement de la demande">
-      <div className="rsteps-head">
-        <b>Avancement</b>
-        <span>
-          {doneCount} / {steps.length} étape{steps.length > 1 ? "s" : ""}
+    <section className={`track t-${mood}`} aria-label="Suivi de la demande">
+      <div className="track-hero">
+        <span className="track-emoji" aria-hidden>
+          {mood === "party" ? "🎉" : mood === "go" ? "📦" : mood === "sad" ? "😕" : "⏳"}
         </span>
+        <div>
+          <p className="track-title">{title}</p>
+          <p className="track-text">{text}</p>
+        </div>
       </div>
-      <div className="rsteps-bar" aria-hidden>
-        {steps.map((s, i) => (
-          <i key={i} className={s.state} />
-        ))}
-      </div>
-      <ol>
-        {steps.map((s, i) => (
-          <li key={i} className={s.state} aria-current={s.state === "current" ? "step" : undefined}>
-            <span className="rdot" aria-hidden>
-              {s.state === "done" ? "✓" : s.state === "stopped" ? "✕" : i + 1}
+      <ol className="track-line" style={{ ["--pct" as string]: Math.max(0, Math.min(100, pct)), ["--n" as string]: steps.length }}>
+        {steps.map((s) => (
+          <li key={s.key} className={s.state} aria-current={s.state === "current" ? "step" : undefined}>
+            <span className="track-dot">
+              <Icon name={s.key} />
             </span>
-            <div>
-              <p className="rtitle">
-                {s.title}
-                {s.state === "current" && <span className="rnow">En cours</span>}
-              </p>
-              {s.at && <p className="rdate">{s.state === "stopped" ? "Le" : "Validé le"} {dateTime(s.at)}</p>}
-              <p className="rdetail">{s.detail}</p>
-            </div>
+            <span className="track-label">{s.label}</span>
+            <span className="track-date">{s.at ? day(s.at) : s.state === "current" ? "en cours" : " "}</span>
           </li>
         ))}
       </ol>
