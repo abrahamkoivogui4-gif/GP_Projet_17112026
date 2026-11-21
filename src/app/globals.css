@@ -256,16 +256,39 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 @media (max-width: 480px) { .vkpis .kpi { padding: 12px 10px; } .vkpis .kpi b { font-size: 1.45rem; } .vkpis .kpi span { font-size: .78rem; } }
 .stack { display: flex; flex-direction: column; gap: 14px; }
 
-/* Trajets qui défilent horizontalement (page d'accueil) */
-.railhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 24px 0 14px; }
-.railnav { display: flex; gap: 8px; flex: none; }
-.railnav button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--soft); color: var(--fg); font: 600 1.2rem var(--body); cursor: pointer; display: grid; place-items: center; }
-.railnav button:hover:not(:disabled) { background: var(--soft2); }
-.railnav button:disabled { opacity: .35; cursor: default; }
-.rail { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 16px; overscroll-behavior-x: contain; margin-inline: -16px; padding: 4px 16px 20px; scrollbar-width: thin; }
-.rail > * { flex: 0 0 min(340px, 84%); scroll-snap-align: start; }
-.rail .trip .btn { margin-top: auto; }
-.rail:focus-visible { outline: 3px solid var(--fg); outline-offset: -3px; border-radius: 16px; }
-@media (min-width: 1168px) { .rail { margin-inline: 0; padding-inline: 0; scroll-padding-inline: 0; } }
-.rail .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
-.rail .fields b { white-space: normal; }
+/* Vitrine des trajets (page d'accueil) : fond gris clair, grandes cartes blanches, flèches en bas à droite */
+:root { --shelf: #f5f5f7; --tile: #ffffff; --eyebrow: #b64400; --paddle: rgba(210, 210, 215, .64); --paddle-fg: rgba(0, 0, 0, .56); }
+@media (prefers-color-scheme: dark) { :root { --shelf: #111111; --tile: #1d1d1f; --eyebrow: #ff9f45; --paddle: rgba(66, 66, 69, .72); --paddle-fg: rgba(255, 255, 255, .8); } }
+.shelf { background: var(--shelf); padding: 48px 0 40px; margin-bottom: -56px; }
+.shelf-title { font: 700 clamp(1.5rem, 4.5vw, 2.1rem) / 1.15 var(--display); letter-spacing: -.02em; margin-bottom: 20px; }
+.shelf-title b { color: var(--fg); }
+.shelf-title span { color: #6e6e73; }
+.rail { --edge: max(16px, calc((100vw - var(--page)) / 2 + 16px)); display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--edge); overscroll-behavior-x: contain; padding: 16px var(--edge) 32px; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.rail:focus-visible { outline: 3px solid var(--fg); outline-offset: -3px; }
+.tile { flex: 0 0 min(340px, 80vw); scroll-snap-align: start; min-height: 400px; background: var(--tile); color: var(--fg); text-decoration: none; border-radius: 18px; padding: 28px 26px 24px; display: flex; flex-direction: column; gap: 10px; box-shadow: 2px 4px 12px rgba(0, 0, 0, .08); transition: transform .3s cubic-bezier(0, 0, .5, 1), box-shadow .3s cubic-bezier(0, 0, .5, 1); }
+.tile:hover { transform: scale(1.01); box-shadow: 2px 4px 16px rgba(0, 0, 0, .16); }
+.tile:focus-visible { outline: 3px solid var(--fg); outline-offset: 3px; }
+.tile .eyebrow { color: var(--eyebrow); font-size: .8rem; font-weight: 600; letter-spacing: .01em; }
+.tile h3 { font-size: clamp(1.6rem, 5vw, 1.85rem); line-height: 1.12; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.tile-sub { color: var(--fg); font-size: 1rem; line-height: 1.45; }
+.tile-foot { margin-top: auto; display: flex; flex-direction: column; gap: 16px; }
+.tile-price { font-size: .95rem; color: var(--fg); }
+.tile-price b { font-weight: 600; }
+.tile-gp { display: flex; align-items: center; gap: 12px; font-size: .92rem; font-weight: 600; line-height: 1.35; border-top: 1px solid var(--line); padding-top: 16px; }
+.tile-gp small { font-weight: 400; color: var(--muted); font-size: .85rem; }
+.tile-gp .avatar { width: 40px; height: 40px; }
+.tile.full { opacity: .6; }
+.tile.full .eyebrow { color: var(--muted); }
+.railnav { display: flex; justify-content: flex-end; gap: 14px; }
+.railnav button { width: 36px; height: 36px; border-radius: 50%; border: 0; padding: 0; background: var(--paddle); color: var(--paddle-fg); cursor: pointer; display: grid; place-items: center; transition: background-color .1s, opacity .1s; }
+.railnav button:hover:not(:disabled) { background: rgba(223, 223, 227, .7); color: rgba(0, 0, 0, .64); }
+.railnav button:disabled { opacity: .42; cursor: default; }
+.tile { min-height: 380px; }
+.tile-route { flex: 1; display: flex; align-items: center; gap: 10px; color: var(--fg); padding: 18px 4px; min-height: 90px; }
+.tile-route .dot, .tile-route .sq { width: 12px; height: 12px; background: currentColor; flex: none; }
+.tile-route .dot { border-radius: 50%; }
+.tile-route .line { flex: 1; height: 0; border-top: 2px dashed var(--line); }
+.tile-route svg { flex: none; transition: transform .4s cubic-bezier(0, 0, .5, 1); }
+.tile:hover .tile-route svg { transform: translateX(6px); }
+.tile-foot { margin-top: 0; }

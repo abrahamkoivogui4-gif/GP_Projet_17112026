@@ -1,10 +1,10 @@
 import { searchTrips } from "@/lib/queries";
 import { CITIES } from "@/lib/constants";
 import { todayIso } from "@/lib/format";
-import { TripCard } from "@/components/TripCard";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { AutoSubmit } from "@/components/AutoSubmit";
 import { TripRail } from "@/components/TripRail";
+import { TripTile } from "@/components/TripTile";
 
 export const dynamic = "force-dynamic";
 
@@ -96,24 +96,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
         </div>
       </section>
 
-      <section className="bleed">
-        <div className="pagein">
-          {list.length ? (
-            <TripRail title={list.length > 1 ? `${list.length} trajets trouvés` : "1 trajet trouvé"}>
-              {list.map((t) => (
-                <TripCard key={t.id} t={t} />
-              ))}
-            </TripRail>
-          ) : (
-            <>
-              <div className="railhead">
-                <h2>Aucun trajet trouvé</h2>
-              </div>
-              <div className="card empty">Aucun trajet pour le moment. Changez la ville ou la date.</div>
-            </>
-          )}
-        </div>
-      </section>
+      {list.length ? (
+        <TripRail
+          title="Les prochains départs."
+          subtitle={list.length > 1 ? `${list.length} trajets avec des GP de confiance.` : "1 trajet avec un GP de confiance."}
+        >
+          {list.map((t) => (
+            <TripTile key={t.id} t={t} />
+          ))}
+        </TripRail>
+      ) : (
+        <section className="bleed shelf">
+          <h2 className="pagein shelf-title">
+            <b>Aucun trajet trouvé.</b> <span>Changez la ville ou la date.</span>
+          </h2>
+        </section>
+      )}
     </>
   );
 }

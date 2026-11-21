@@ -1,8 +1,11 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/** Bandeau horizontal de trajets : on glisse au doigt, ou on utilise les flèches sur ordinateur. */
-export function TripRail({ title, children }: { title: string; children: React.ReactNode }) {
+/**
+ * Bandeau horizontal façon vitrine : fond gris clair, grandes cartes, flèches en bas à droite.
+ * On glisse au doigt sur téléphone, ou on utilise les flèches sur ordinateur.
+ */
+export function TripRail({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   const rail = useRef<HTMLDivElement>(null);
   const [edges, setEdges] = useState({ start: true, end: true });
 
@@ -29,28 +32,32 @@ export function TripRail({ title, children }: { title: string; children: React.R
     const el = rail.current;
     if (!el) return;
     const card = el.firstElementChild as HTMLElement | null;
-    const step = card ? card.offsetWidth + 16 : el.clientWidth * 0.8;
-    el.scrollBy({ left: dir * step * Math.max(1, Math.floor(el.clientWidth / step)), behavior: "smooth" });
+    const step = card ? card.offsetWidth + 20 : el.clientWidth * 0.8;
+    el.scrollBy({ left: dir * step * Math.max(1, Math.floor((el.clientWidth - 40) / step)), behavior: "smooth" });
   };
 
   return (
-    <section aria-label={title}>
-      <div className="railhead">
-        <h2>{title}</h2>
-        {!(edges.start && edges.end) && (
-          <div className="railnav">
-            <button type="button" aria-label="Trajets précédents" disabled={edges.start} onClick={() => go(-1)}>
-              ←
-            </button>
-            <button type="button" aria-label="Trajets suivants" disabled={edges.end} onClick={() => go(1)}>
-              →
-            </button>
-          </div>
-        )}
-      </div>
+    <section className="bleed shelf" aria-label={title}>
+      <h2 className="pagein shelf-title">
+        <b>{title}</b> <span>{subtitle}</span>
+      </h2>
       <div className="rail" ref={rail} tabIndex={0}>
         {children}
       </div>
+      {!(edges.start && edges.end) && (
+        <div className="pagein railnav">
+          <button type="button" aria-label="Trajets précédents" disabled={edges.start} onClick={() => go(-1)}>
+            <svg viewBox="0 0 36 36" width="36" height="36" aria-hidden>
+              <path d="M21 11l-7 7 7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button type="button" aria-label="Trajets suivants" disabled={edges.end} onClick={() => go(1)}>
+            <svg viewBox="0 0 36 36" width="36" height="36" aria-hidden>
+              <path d="M15 11l7 7-7 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      )}
     </section>
   );
 }
