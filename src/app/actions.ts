@@ -344,6 +344,7 @@ export async function submitVerification(_: FormState, fd: FormData): Promise<Fo
   await db.insert(verificationDocs).values({ userId: u.id, filePath: name, mimeType: file.type });
   await db.update(users).set({ verification: "pending" }).where(eq(users.id, u.id));
   revalidatePath("/gp");
+  revalidatePath("/gp/verification");
   return { ok: "Pièce envoyée. L'équipe la contrôle et vous aurez le badge dès validation." };
 }
 

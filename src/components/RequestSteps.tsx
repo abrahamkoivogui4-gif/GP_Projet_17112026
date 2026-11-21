@@ -1,7 +1,7 @@
 import { etaLabel } from "@/lib/format";
 
 type State = "done" | "current" | "todo" | "stopped";
-type Step = { key: string; label: string; state: State; at?: Date | null };
+export type Step = { key: string; label: string; state: State; at?: Date | null };
 
 const day = (d: Date) => d.toLocaleDateString("fr-FR", { day: "numeric", month: "short", timeZone: "Europe/Paris" });
 
@@ -20,6 +20,20 @@ function Icon({ name }: { name: string }) {
     home: <path {...p} d="M4 11l8-6 8 6v8a1 1 0 0 1-1 1h-4v-5h-6v5H5a1 1 0 0 1-1-1z" />,
     star: <path {...p} d="M12 4l2.5 5 5.5.8-4 3.9.9 5.5L12 16.6 7.1 19.2 8 13.7 4 9.8l5.5-.8z" />,
     stop: <path {...p} d="M7 7l10 10M17 7L7 17" />,
+    card: (
+      <>
+        <rect {...p} x="3" y="6" width="18" height="12" rx="2" />
+        <circle {...p} cx="9" cy="12" r="2" />
+        <path {...p} d="M14 10h4M14 14h3" />
+      </>
+    ),
+    eye: (
+      <>
+        <path {...p} d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+        <circle {...p} cx="12" cy="12" r="2.5" />
+      </>
+    ),
+    badge: <path {...p} d="M12 3l2.4 1.8 3-.2.9 2.9 2.4 1.8-1 2.8 1 2.8-2.4 1.8-.9 2.9-3-.2L12 21l-2.4-1.8-3 .2-.9-2.9L3.3 14.7l1-2.8-1-2.8 2.4-1.8.9-2.9 3 .2zM8.5 12l2.5 2.5 4.5-5" />,
   };
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden>
@@ -102,14 +116,36 @@ export function RequestSteps({
     text = reviewedAt ? "Merci pour votre avis." : you ? `Un petit avis pour ${gpFirst} ? Ça aide les autres expéditeurs.` : "Le client peut maintenant vous laisser un avis.";
   }
 
-  const done = steps.filter((s) => s.state === "done").length;
-  const pct = stopped ? 100 : Math.round(((done - 1 + (steps.some((s) => s.state === "current") ? 0.5 : 0)) / (steps.length - 1)) * 100);
+  return <Tracker mood={mood} title={title} text={text} steps={steps} label="Suivi de la demande" />;
+}
 
+const EMOJI = { wait: "⏳", go: "📦", party: "🎉", sad: "😕", id: "🪪", search: "🔎" } as const;
+
+/** Affichage commun des suivis (demande de colis, badge vérifié) : grand message + parcours d'étapes. */
+export function Tracker({
+  mood,
+  emoji,
+  title,
+  text,
+  steps,
+  label,
+}: {
+  mood: "wait" | "go" | "party" | "sad";
+  emoji?: keyof typeof EMOJI;
+  title: string;
+  text: string;
+  steps: Step[];
+  label: string;
+}) {
+  const done = steps.filter((s) => s.state === "done").length;
+  const stopped = steps.some((s) => s.state === "stopped");
+  const current = steps.some((s) => s.state === "current");
+  const pct = stopped ? 100 : Math.round(((Math.max(0, done - 1) + (current && done > 0 ? 0.5 : 0)) / (steps.length - 1)) * 100);
   return (
-    <section className={`track t-${mood}`} aria-label="Suivi de la demande">
+    <section className={`track t-${mood}`} aria-label={label}>
       <div className="track-hero">
         <span className="track-emoji" aria-hidden>
-          {mood === "party" ? "🎉" : mood === "go" ? "📦" : mood === "sad" ? "😕" : "⏳"}
+          {EMOJI[emoji ?? mood]}
         </span>
         <div>
           <p className="track-title">{title}</p>
