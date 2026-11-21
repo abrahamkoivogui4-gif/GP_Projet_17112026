@@ -342,3 +342,8 @@ input.codeinput { font: 700 1.8rem var(--display); letter-spacing: .2em; text-al
 .tofill { background: #fff3cd; color: #7a5200; border-radius: 4px; padding: 0 4px; }
 .banlist { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; list-style: none; padding: 0 !important; }
 .banlist li { background: var(--dangerbg); color: var(--danger); border-radius: 12px; padding: 12px 14px; font-weight: 600; }
+
+/* Pied de page arrondi : il chevauche légèrement le bas de la page pour que les coins laissent voir le fond au-dessus */
+.foot { position: relative; margin-top: -32px; border-radius: 32px 32px 0 0; }
+.foot-pills a, .foot-pills span { border-radius: 999px; }
+@media (min-width: 860px) { .foot { border-radius: 44px 44px 0 0; } }
