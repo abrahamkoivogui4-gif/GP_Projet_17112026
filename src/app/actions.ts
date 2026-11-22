@@ -46,12 +46,35 @@ export async function createTrip(_: FormState, fd: FormData): Promise<FormState>
   const u = await requireGp();
   const parsed = tripSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { error: parsed.error.issues[0].message.startsWith("Invalid") ? "Vérifiez les informations du trajet." : parsed.error.issues[0].message };
-  if (!rateLimit(`trip:${u.id}`, 20, 24 * 3600_000)) return { error: "Trop de trajets publiés aujourd'hui." };
+  if (!rateLimit(`trip:${u.id}`, u.role === "admin" ? 200 : 20, 24 * 3600_000)) return { error: "Trop de trajets publiés aujourd'hui." };
+
+  // Un administrateur peut publier au nom d'un autre compte (ex. un GP qui lui a envoyé ses infos).
+  let gpId = u.id;
+  let owner: { name: string; phone: string } | null = null;
+  const forUser = Number(fd.get("forUser")) || 0;
+  if (forUser && u.role === "admin" && forUser !== u.id) {
+    const target = await db.query.users.findFirst({
+      where: eq(users.id, forUser),
+      columns: { id: true, name: true, phone: true, role: true, suspended: true, deletedAt: true },
+    });
+    if (!target || target.deletedAt) return { error: "Ce compte n'existe plus." };
+    if (target.suspended) return { error: "Ce compte est suspendu : réactivez-le avant de publier pour lui." };
+    if (target.role === "client") await db.update(users).set({ role: "gp" }).where(eq(users.id, target.id));
+    gpId = target.id;
+    owner = target;
+  }
+
   const [t] = await db
     .insert(trips)
-    .values({ ...parsed.data, gpId: u.id, forbiddenItems: parseForbidden(fd) })
+    .values({ ...parsed.data, gpId, forbiddenItems: parseForbidden(fd) })
     .returning({ id: trips.id });
+  if (owner)
+    await notify(
+      owner.phone,
+      `L'équipe Lilalink a publié pour vous le trajet ${parsed.data.fromCity} → ${parsed.data.toCity} du ${shortDate(parsed.data.departureDate)}. Retrouvez-le dans votre Espace GP.`,
+    );
   revalidatePath("/");
+  revalidatePath("/admin/trajets");
   redirect(`/gp/trajets/${t.id}?publie=1`);
 }
 

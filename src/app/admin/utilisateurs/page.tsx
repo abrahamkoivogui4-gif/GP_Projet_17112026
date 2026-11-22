@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { desc, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -40,6 +41,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
           </div>
           {u.id !== me.id && !u.deletedAt && (
             <>
+              {!u.suspended && u.role !== "admin" && (
+                <Link className="btn small" href={`/gp/publier?pour=${u.id}`}>
+                  Publier un trajet
+                </Link>
+              )}
               <ResetPasswordButton id={u.id} />
               <form action={setUserSuspended}>
                 <input type="hidden" name="id" value={u.id} />

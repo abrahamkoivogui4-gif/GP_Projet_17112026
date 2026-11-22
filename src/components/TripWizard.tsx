@@ -9,7 +9,7 @@ import { SubmitButton } from "./SubmitButton";
 
 const STEPS = 8;
 
-export function TripWizard({ today }: { today: string }) {
+export function TripWizard({ today, forUser }: { today: string; forUser?: { id: number; name: string; phone: string; isClient: boolean } }) {
   const [state, action] = useActionState<FormState, FormData>(createTrip, {});
   const [step, setStep] = useState(1);
   const [from, setFrom] = useState("");
@@ -63,6 +63,16 @@ export function TripWizard({ today }: { today: string }) {
 
   return (
     <form action={action} className="card">
+      {forUser && (
+        <div className="onbehalf">
+          <b>Vous publiez pour {forUser.name}</b>
+          <span>
+            {forUser.phone}
+            {forUser.isClient ? " · ce compte client deviendra GP" : ""}. Le trajet apparaîtra dans son Espace GP et la personne sera prévenue.
+          </span>
+          <input type="hidden" name="forUser" value={forUser.id} />
+        </div>
+      )}
       <div className="steps" aria-hidden>
         {Array.from({ length: STEPS }, (_, i) => (
           <i key={i} className={i < step ? "on" : ""} />
@@ -173,7 +183,7 @@ export function TripWizard({ today }: { today: string }) {
           Continuer
         </button>
       ) : (
-        <SubmitButton pendingText="Publication…">Publier mon trajet</SubmitButton>
+        <SubmitButton pendingText="Publication…">{forUser ? `Publier ce trajet pour ${forUser.name}` : "Publier mon trajet"}</SubmitButton>
       )}
       {step > 1 && (
         <button type="button" className="link" onClick={() => go(step - 1)}>

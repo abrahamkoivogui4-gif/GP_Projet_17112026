@@ -396,3 +396,6 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 @media (prefers-reduced-motion: reduce) { .track-line li.current .track-dot, .track.t-party .track-emoji { animation: none; } .track-line::after { transition: none; } }
 @media (prefers-color-scheme: dark) { .track { --ok: #2ea043; } .track.t-go { background: #0f1d2e; } .track.t-party { background: #0f2416; } }
 @media (max-width: 480px) { .track-dot { width: 40px; height: 40px; } .track-line::before, .track-line::after { top: 18px; } .track-label { font-size: .7rem; letter-spacing: -.01em; } .track-date { font-size: .68rem; } }
+.onbehalf { background: #eef6ff; border: 2px solid var(--verified); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; font-size: .92rem; }
+.onbehalf b { font-size: 1rem; }
+@media (prefers-color-scheme: dark) { .onbehalf { background: #0f1d2e; } }
