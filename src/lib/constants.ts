@@ -7,7 +7,7 @@ export const CITY_GROUPS: { country: string; flag: string; cc: string; cities: s
   { country: "Belgique", flag: "🇧🇪", cc: "+32", cities: ["Bruxelles"] },
   { country: "Suisse", flag: "🇨🇭", cc: "+41", cities: ["Genève"] },
   { country: "Espagne", flag: "🇪🇸", cc: "+34", cities: ["Madrid"] },
-  { country: "Italie", flag: "🇮🇹", cc: "+39", cities: ["Milan"] },
+  { country: "Italie", flag: "🇮🇹", cc: "+39", cities: ["Rome", "Milan"] },
   { country: "Allemagne", flag: "🇩🇪", cc: "+49", cities: ["Berlin"] },
   { country: "Pays-Bas", flag: "🇳🇱", cc: "+31", cities: ["Amsterdam"] },
   { country: "Portugal", flag: "🇵🇹", cc: "+351", cities: ["Lisbonne"] },

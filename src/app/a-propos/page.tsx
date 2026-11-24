@@ -8,7 +8,7 @@ export default function Page() {
     <Doc title="Qui sommes-nous" lead="Lilalink, le colis entre personnes de confiance.">
       <section>
         <p>
-          Entre l&apos;Europe, le Canada, les États-Unis et l&apos;Afrique de l&apos;Ouest (Sénégal, Guinée, Côte d&apos;Ivoire, Burkina Faso, Mali), des milliers de colis voyagent chaque semaine dans les valises des <b>GP</b> : des voyageurs qui
+          Entre l&apos;Occident (Europe, Canada, États-Unis) et l&apos;Afrique de l&apos;Ouest (Guinée, Sénégal, Côte d&apos;Ivoire, Burkina Faso, Mali), des milliers de colis voyagent chaque semaine dans les valises des <b>GP</b> : des voyageurs qui
           ont de la place et qui la proposent, au kilo. C&apos;est rapide et souvent moins cher qu&apos;un transporteur, mais trouver un GP sérieux se fait
           encore de bouche à oreille ou dans des groupes WhatsApp, sans garantie.
         </p>

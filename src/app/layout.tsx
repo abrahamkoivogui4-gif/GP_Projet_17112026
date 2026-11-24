@@ -12,7 +12,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: { default: "Lilalink · Envoyez vos colis avec un GP de confiance", template: "%s · Lilalink" },
-  description: "Lilalink, le colis entre personnes de confiance. Trouvez un GP vérifié pour envoyer vos colis entre l'Europe, le Canada, les États-Unis et l'Afrique de l'Ouest.",
+  description: "Lilalink, le colis entre personnes de confiance. Trouvez un GP vérifié pour envoyer vos colis de l'Occident (Europe, Canada, États-Unis) vers la Guinée et l'Afrique de l'Ouest.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };
@@ -122,7 +122,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 ))}
               </div>
               <div className="foot-pills">
-                <span>Europe · Canada · États-Unis ↔ Afrique de l&apos;Ouest</span>
+                <span>Occident ↔ Guinée et Afrique de l&apos;Ouest</span>
               </div>
             </div>
             <p className="foot-note">

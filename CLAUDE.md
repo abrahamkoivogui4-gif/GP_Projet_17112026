@@ -11,9 +11,9 @@ L'historique complet (serveur, décisions, préférences du propriétaire) est d
 
 ## État des branches
 
-En production : **`publier-pour-compte`** ; à déployer : **`zones-elargies`** (contient tout sauf WhatsApp). `main` est en retard et devra recevoir toutes les branches.
+En production : **`publier-pour-compte`** ; à déployer : **`textes-occident`** (contient tout sauf WhatsApp). `main` est en retard et devra recevoir toutes les branches.
 
-Ordre : `design-epure` → `stats-visites` → `notif-email` → `trajets-defilants` → `bandeau-vitrine` → `espace-gp-vitrine` → `pages-infos` → `suppression-compte` → `etapes-demande` → `publier-pour-compte` → `mentions-particulier` → `zones-elargies`.
+Ordre : `design-epure` → `stats-visites` → `notif-email` → `trajets-defilants` → `bandeau-vitrine` → `espace-gp-vitrine` → `pages-infos` → `suppression-compte` → `etapes-demande` → `publier-pour-compte` → `mentions-particulier` → `zones-elargies` → `textes-occident`.
 Mise de côté : `notif-whatsapp` (WhatsApp Business payant) → future offre Premium, ne pas l'activer gratuitement.
 
 ## Repères techniques

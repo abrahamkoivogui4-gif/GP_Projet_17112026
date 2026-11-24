@@ -22,7 +22,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
         <div className="pagein heroin">
           <div className="herotext">
             <h1>Envoyez vos colis avec un GP de confiance</h1>
-            <p className="lead">Entre l&apos;Europe, le Canada, les États-Unis et l&apos;Afrique de l&apos;Ouest, avec des voyageurs vérifiés et notés par les expéditeurs.</p>
+            <p className="lead">De l&apos;Occident (Europe, Canada, États-Unis) vers la Guinée et l&apos;Afrique de l&apos;Ouest, avec des voyageurs vérifiés et notés par les expéditeurs.</p>
             <form className="search" method="get" action="/">
               <AutoSubmit />
               <div className="legs">
