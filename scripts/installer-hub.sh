@@ -58,7 +58,7 @@ fi
 
 # 3. Démarrage du Hub -------------------------------------------------------------
 vert "Étape 3/4 — Démarrage du Hub (quelques minutes)"
-( cd "$HUB" && docker compose up -d --build )
+( cd "$HUB" && docker compose up -d --build --remove-orphans )
 
 # 4. Branchement sur Caddy (HTTPS), vérifié avant tout redémarrage ---------------------
 vert "Étape 4/4 — Adresse https://hub.lilalink.fr"
