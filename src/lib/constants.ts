@@ -17,7 +17,7 @@ export const CITY_GROUPS: { country: string; flag: string; cc: string; cities: s
   { country: "États-Unis", flag: "🇺🇸", cc: "+1", cities: ["New York", "Washington", "Atlanta"] },
   // Afrique de l'Ouest
   { country: "Sénégal", flag: "🇸🇳", cc: "+221", cities: ["Dakar", "Thiès"] },
-  { country: "Guinée", flag: "🇬🇳", cc: "+224", cities: ["Conakry", "Kankan", "Labé", "Nzérékoré"] },
+  { country: "Guinée", flag: "🇬🇳", cc: "+224", cities: ["Conakry"] },
   { country: "Côte d'Ivoire", flag: "🇨🇮", cc: "+225", cities: ["Abidjan", "Bouaké", "Yamoussoukro"] },
   { country: "Burkina Faso", flag: "🇧🇫", cc: "+226", cities: ["Ouagadougou", "Bobo-Dioulasso"] },
   { country: "Mali", flag: "🇲🇱", cc: "+223", cities: ["Bamako", "Kayes"] },
