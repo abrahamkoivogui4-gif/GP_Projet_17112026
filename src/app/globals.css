@@ -400,3 +400,58 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 .onbehalf b { font-size: 1rem; }
 @media (prefers-color-scheme: dark) { .onbehalf { background: #0f1d2e; } }
 .citygroup { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+
+/* ======================================================================
+   Palette « Bleu azur, cœur rouge » — bleu ciel + rouge commun aux deux drapeaux + 🇬🇳 vert et jaune
+   Bleu azur : marque, barre, titres, boutons principaux, sélection (#0077D9 : texte blanc lisible)
+   Rouge : grands boutons d'action (rechercher, envoyer la demande)
+   Vert : ce qui est validé · Jaune : étoiles et « en attente »
+   ====================================================================== */
+:root {
+  --brand: #0077D9; --brand-2: #0066CC; --red: #CE1126; --green: #00784C; --yellow: #FCD116;
+  --title: var(--brand);
+  --accent: var(--brand); --accent-fg: #ffffff; --sun: var(--brand); --sun-fg: #ffffff;
+  --bar: var(--brand); --bar-fg: #ffffff; --verified: var(--brand-2);
+  --shelf: #EAF4FF; --eyebrow: var(--green); --paddle: rgba(0, 119, 217, .12); --paddle-fg: var(--brand);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand: #4DA3FF; --brand-2: #7DBBFF; --red: #FF4D5E; --green: #3FB950;
+    --title: #ffffff; --accent: #0A74D6; --accent-fg: #ffffff; --sun: #0A74D6; --sun-fg: #ffffff;
+    --bar: #005EAD; --bar-fg: #ffffff; --verified: #7DBBFF; --shelf: #0B1A2B; --eyebrow: #3FB950;
+  }
+}
+h1 { color: var(--title); }
+.hero h1 em { font-style: normal; color: var(--red); }
+.who-mini { background: rgba(255, 255, 255, .15); }
+.barbtn { color: var(--bar); }
+.nav a:hover { background: rgba(255, 255, 255, .14); }
+.nav a[aria-current="page"] { color: var(--bar); }
+.nav .count, .nav a[aria-current="page"] .count { background: var(--red); color: #fff; }
+.btn.cta { background: var(--red); border-color: var(--red); color: #fff; }
+.chip[aria-pressed="true"], .chip.on, .subnav a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.howto li::before, .doc .steps3 li::before, .tile-new .plus { background: var(--accent); color: var(--accent-fg); }
+.pt::before { background: var(--accent); }
+.pt:not(.dot)::before { background: var(--red); }
+.pt.dot::after { background: linear-gradient(var(--accent), var(--red)); }
+.tile-route .dot, .tile-route svg { color: var(--accent); background: var(--accent); }
+.tile-route svg { background: none; }
+.tile-route .sq { background: var(--red); }
+.pill.accepted, .pill.in_progress, .pill.active { background: var(--green); color: #fff; }
+.pill.pending, .pill.new { background: #FFF6CC; color: #7A5B00; box-shadow: none; }
+.st, .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #E8A400; }
+.track { --ok: var(--green); }
+.track-line li.current .track-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+.track-line li.current .track-date { color: var(--accent); }
+.fillbar i, .vchart .bar, .bar div i { fill: var(--accent); background: var(--accent); }
+.kpi.hot { border-color: var(--accent); }
+.codebox { border-color: var(--accent); }
+.tile-more, .doc a { color: var(--brand-2); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, summary:focus-visible { outline-color: var(--brand-2); }
+input:focus, select:focus, textarea:focus, .legs select:focus, .search input:focus, .search select:focus { border-color: var(--brand-2); }
+.foot { background: #062A4D; }
+.foot-pills a, .foot-pills span, .foot-row-hub button { background: rgba(255, 255, 255, .1); }
+.foot-legal { border-top-color: rgba(255, 255, 255, .15); }
+/* Dans la barre bleue, le badge vérifié passe en blanc avec une coche bleue pour rester visible */
+.top .vb path:first-of-type { fill: #fff; stroke: #fff; }
+.top .vb path:last-of-type { stroke: var(--bar); }

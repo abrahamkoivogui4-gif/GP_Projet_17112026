@@ -92,7 +92,7 @@ export function RequestForm(p: { tripId: number; gpName: string; price: number; 
           {state.error}
         </p>
       )}
-      <SubmitButton disabled={!ok} pendingText="Envoi…">
+      <SubmitButton className="btn cta" disabled={!ok} pendingText="Envoi…">
         Envoyer ma demande
       </SubmitButton>
       <p className="tag">Le paiement se fait directement avec le GP, à la remise du colis.</p>

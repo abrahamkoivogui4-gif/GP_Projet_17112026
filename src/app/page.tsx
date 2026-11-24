@@ -21,7 +21,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
       <section className="bleed hero">
         <div className="pagein heroin">
           <div className="herotext">
-            <h1>Envoyez vos colis avec un GP de confiance</h1>
+            <h1>
+              Envoyez vos colis avec un <em>GP de confiance</em>
+            </h1>
             <p className="lead">De l&apos;Occident (Europe, Canada, États-Unis) vers la Guinée et l&apos;Afrique de l&apos;Ouest, avec des voyageurs vérifiés et notés par les expéditeurs.</p>
             <form className="search" method="get" action="/">
               <AutoSubmit />
@@ -73,7 +75,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
                   Seulement les GP vérifiés <VerifiedBadge size={20} />
                 </span>
               </label>
-              <button className="btn auto" type="submit">
+              <button className="btn auto cta" type="submit">
                 Voir les trajets
               </button>
             </form>
