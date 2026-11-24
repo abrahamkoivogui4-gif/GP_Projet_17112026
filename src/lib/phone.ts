@@ -9,7 +9,7 @@ export function normalizePhone(countryCode: string, national: string): string | 
   if (digits.startsWith("00" + cc)) digits = digits.slice(2 + cc.length);
   else if (digits.startsWith(cc) && digits.length > 9 + cc.length - 1) digits = digits.slice(cc.length);
   digits = digits.replace(/^0+/, "");
-  if (digits.length < 8 || digits.length > 10) return null;
+  if (digits.length < 8 || digits.length > 11) return null; // 11 : portables allemands
   return countryCode + digits;
 }
 

@@ -1,5 +1,5 @@
 import { searchTrips } from "@/lib/queries";
-import { CITIES } from "@/lib/constants";
+import { CITIES, CITY_GROUPS } from "@/lib/constants";
 import { todayIso } from "@/lib/format";
 import { VerifiedBadge } from "@/components/VerifiedBadge";
 import { AutoSubmit } from "@/components/AutoSubmit";
@@ -22,26 +22,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<SP>
         <div className="pagein heroin">
           <div className="herotext">
             <h1>Envoyez vos colis avec un GP de confiance</h1>
-            <p className="lead">Entre la France et l&apos;Afrique, avec des voyageurs vérifiés et notés par les expéditeurs.</p>
+            <p className="lead">Entre l&apos;Europe, le Canada, les États-Unis et l&apos;Afrique de l&apos;Ouest, avec des voyageurs vérifiés et notés par les expéditeurs.</p>
             <form className="search" method="get" action="/">
               <AutoSubmit />
               <div className="legs">
                 <span className="pt dot" aria-hidden />
                 <select id="de" name="de" defaultValue={f.from} aria-label="Ville de départ">
                   <option value="">Départ : toutes les villes</option>
-                  {CITIES.map((c) => (
-                    <option key={c} value={c}>
-                      Départ : {c}
-                    </option>
+                  {CITY_GROUPS.map((g) => (
+                    <optgroup key={g.country} label={`${g.flag} ${g.country}`}>
+                      {g.cities.map((c) => (
+                        <option key={c} value={c}>
+                          Départ : {c}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
                 <span className="pt" aria-hidden />
                 <select id="vers" name="vers" defaultValue={f.to} aria-label="Ville d'arrivée">
                   <option value="">Arrivée : toutes les villes</option>
-                  {CITIES.map((c) => (
-                    <option key={c} value={c}>
-                      Arrivée : {c}
-                    </option>
+                  {CITY_GROUPS.map((g) => (
+                    <optgroup key={g.country} label={`${g.flag} ${g.country}`}>
+                      {g.cities.map((c) => (
+                        <option key={c} value={c}>
+                          Arrivée : {c}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </div>

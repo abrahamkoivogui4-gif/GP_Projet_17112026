@@ -2,7 +2,7 @@
 
 > Lilalink, le colis entre personnes de confiance.
 
-Application web de mise en relation entre **GP** (voyageurs qui transportent des colis) et **expéditeurs**, sur les trajets France ↔ Afrique.
+Application web de mise en relation entre **GP** (voyageurs qui transportent des colis) et **expéditeurs**, sur les trajets Europe, Canada, États-Unis ↔ Afrique de l'Ouest (Sénégal, Guinée, Côte d'Ivoire, Burkina Faso, Mali).
 
 - Les GP publient leurs trajets : villes, date, kilos disponibles, **prix au kilo**, **délai de livraison**, **liste d'objets refusés** (modifiable).
 - Les clients cherchent un trajet, voient le total de leur colis, envoient une demande avec une description et discutent avec le GP.

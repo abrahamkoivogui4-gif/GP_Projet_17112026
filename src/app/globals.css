@@ -399,3 +399,4 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 .onbehalf { background: #eef6ff; border: 2px solid var(--verified); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; font-size: .92rem; }
 .onbehalf b { font-size: 1rem; }
 @media (prefers-color-scheme: dark) { .onbehalf { background: #0f1d2e; } }
+.citygroup { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }

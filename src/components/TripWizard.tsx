@@ -2,7 +2,7 @@
 import { useActionState, useState } from "react";
 import { createTrip } from "@/app/actions";
 import type { FormState } from "@/app/auth-actions";
-import { CITIES, DEFAULT_FORBIDDEN } from "@/lib/constants";
+import { CITY_GROUPS, DEFAULT_FORBIDDEN, TOP_CITIES } from "@/lib/constants";
 import { addDays, delayLabel, longDate, shortDate } from "@/lib/format";
 import { DelayField, ForbiddenEditor, KgField, PriceField } from "./TripFields";
 import { SubmitButton } from "./SubmitButton";
@@ -21,8 +21,6 @@ export function TripWizard({ today, forUser }: { today: string; forUser?: { id: 
   const [ban, setBan] = useState<string[]>(DEFAULT_FORBIDDEN.slice(0, 4));
   const [showAllCities, setShowAll] = useState(false);
 
-  const top = ["Paris", "Lyon", "Marseille", "Lille", "Conakry", "Kankan", "Labé", "Dakar", "Abidjan", "Bamako"];
-  const cityList = (exclude: string) => (showAllCities ? CITIES : top).filter((c) => c !== exclude);
   const go = (n: number) => {
     setStep(n);
     window.scrollTo({ top: 0 });
@@ -35,31 +33,43 @@ export function TripWizard({ today, forUser }: { today: string; forUser?: { id: 
     ["Dans 2 mois", 60],
   ] as const;
 
-  const CityChips = ({ value, set, exclude, next }: { value: string; set: (c: string) => void; exclude: string; next: number }) => (
+  const CityChips = ({ value, set, exclude, next }: { value: string; set: (c: string) => void; exclude: string; next: number }) => {
+    const chip = (c: string) => (
+      <button
+        key={c}
+        type="button"
+        className="chip"
+        aria-pressed={value === c}
+        onClick={() => {
+          set(c);
+          go(next);
+        }}
+      >
+        {c}
+      </button>
+    );
+    return (
     <>
-      <div className="chips">
-        {cityList(exclude).map((c) => (
-          <button
-            key={c}
-            type="button"
-            className="chip"
-            aria-pressed={value === c}
-            onClick={() => {
-              set(c);
-              go(next);
-            }}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
+      {showAllCities ? (
+        CITY_GROUPS.map((g) => (
+          <div key={g.country} className="citygroup">
+            <p className="kicker">
+              {g.flag} {g.country}
+            </p>
+            <div className="chips">{g.cities.filter((c) => c !== exclude).map(chip)}</div>
+          </div>
+        ))
+      ) : (
+        <div className="chips">{TOP_CITIES.filter((c) => c !== exclude).map(chip)}</div>
+      )}
       {!showAllCities && (
         <button type="button" className="link" onClick={() => setShowAll(true)}>
           Voir toutes les villes
         </button>
       )}
     </>
-  );
+    );
+  };
 
   return (
     <form action={action} className="card">
