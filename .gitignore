@@ -8,3 +8,7 @@ data/
 next-env.d.ts
 npm-debug.log*
 backups/
+
+# Sites supplémentaires propres à ce serveur
+caddy-extra/*.caddy
+!caddy-extra/lisez-moi.caddy
