@@ -36,3 +36,7 @@ Mise de côté : `notif-whatsapp` (WhatsApp Business payant) → future offre Pr
 - React 19 vide les formulaires après une action serveur : renvoyer `values` en cas d'erreur.
 - Classes CSS génériques déjà utilisées (`.total`, `.wait`, `.qr`, `.kpi span`) : ne pas les réutiliser pour autre chose.
 - Playwright : redirection d'action serveur → `waitForURL(..., { waitUntil: "commit" })`.
+
+## Journal
+
+`CHANGELOG.md` : évolutions par date et par branche. **Ajouter une ligne à chaque nouvelle branche** (sans info personnelle). Le journal détaillé est dans `JOURNAL.md` du dépôt privé `business-hub`.
