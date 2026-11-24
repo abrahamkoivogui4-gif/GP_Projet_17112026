@@ -7,7 +7,7 @@ import nodemailer from "nodemailer";
  * Variables d'environnement :
  *   SMTP_HOST   serveur d'envoi, ex. ssl0.ovh.net ou smtp-relay.brevo.com
  *   SMTP_PORT   465 (SSL, par défaut) ou 587
- *   SMTP_USER   identifiant, ex. contact@lilalink.fr
+ *   SMTP_USER   identifiant, ex. support@lilalink.fr
  *   SMTP_PASS   mot de passe de la boîte ou clé SMTP
  *   MAIL_FROM   expéditeur affiché (défaut : « Lilalink <SMTP_USER> »)
  * Sans SMTP_HOST, rien n'est envoyé : l'e-mail est seulement écrit dans les logs.

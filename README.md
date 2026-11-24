@@ -123,15 +123,15 @@ Dans « Espace GP », chaque GP peut choisir de recevoir un e-mail à chaque nou
 
 Les e-mails partent par **SMTP**, depuis une adresse à votre nom. Le plus simple avec un domaine OVH :
 
-1. Dans l'espace client OVH : **Web Cloud → E-mails**, créez l'adresse `contact@lilalink.fr` (ou `notifications@…`) et choisissez son mot de passe.
+1. Dans l'espace client OVH : **Web Cloud → E-mails**, créez l'adresse `support@lilalink.fr` (ou `notifications@…`) et choisissez son mot de passe.
 2. Sur le serveur, dans `.env` :
 
    ```
    SMTP_HOST=ssl0.ovh.net
    SMTP_PORT=465
-   SMTP_USER=contact@lilalink.fr
+   SMTP_USER=support@lilalink.fr
    SMTP_PASS=le-mot-de-passe-de-la-boite
-   MAIL_FROM=Lilalink <contact@lilalink.fr>
+   MAIL_FROM=Lilalink <support@lilalink.fr>
    ```
 
 3. Relancez : `docker compose -f docker-compose.prod.yml up -d`, puis testez avec « M'envoyer un e-mail d'essai ».
