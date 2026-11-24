@@ -402,41 +402,42 @@ body:has(main > .shelf:last-child) .foot::before { content: ""; position: absolu
 .citygroup { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 
 /* ======================================================================
-   Palette « Bleu azur, cœur rouge » — bleu ciel + rouge commun aux deux drapeaux + 🇬🇳 vert et jaune
-   Bleu azur : marque, barre, titres, boutons principaux, sélection (#0077D9 : texte blanc lisible)
-   Rouge : grands boutons d'action (rechercher, envoyer la demande)
-   Vert : ce qui est validé · Jaune : étoiles et « en attente »
+   Palette « Azur + Jaune soleil » (choisie par le propriétaire)
+   Bleu azur : marque, barre, boutons principaux, sélection, mise en valeur (#0077D9 : texte blanc lisible)
+   Jaune soleil : grands boutons d'action (texte noir), fond de la vitrine, étoiles, « en attente »
+   Vert : ce qui est validé · Rouge : seulement les erreurs et refus
    ====================================================================== */
 :root {
-  --brand: #0077D9; --brand-2: #0066CC; --red: #CE1126; --green: #00784C; --yellow: #FCD116;
-  --title: var(--brand);
+  --brand: #0077D9; --brand-2: #0066CC; --red: #CE1126; --green: #00784C; --yellow: #FFC93C; --yellow-ink: #1A1A1A; --yellow-deep: #E0A800;
+  --title: #0B1F33;
   --accent: var(--brand); --accent-fg: #ffffff; --sun: var(--brand); --sun-fg: #ffffff;
   --bar: var(--brand); --bar-fg: #ffffff; --verified: var(--brand-2);
-  --shelf: #EAF4FF; --eyebrow: var(--green); --paddle: rgba(0, 119, 217, .12); --paddle-fg: var(--brand);
+  --shelf: #FFF8E1; --eyebrow: var(--brand); --paddle: rgba(0, 119, 217, .12); --paddle-fg: var(--brand);
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --brand: #4DA3FF; --brand-2: #7DBBFF; --red: #FF4D5E; --green: #3FB950;
-    --title: #ffffff; --accent: #0A74D6; --accent-fg: #ffffff; --sun: #0A74D6; --sun-fg: #ffffff;
-    --bar: #005EAD; --bar-fg: #ffffff; --verified: #7DBBFF; --shelf: #0B1A2B; --eyebrow: #3FB950;
+    --title: #ffffff; --yellow-deep: #FFC93C; --accent: #0A74D6; --accent-fg: #ffffff; --sun: #0A74D6; --sun-fg: #ffffff;
+    --bar: #005EAD; --bar-fg: #ffffff; --verified: #7DBBFF; --shelf: #1C1708; --eyebrow: #7DBBFF;
   }
 }
 h1 { color: var(--title); }
-.hero h1 em { font-style: normal; color: var(--red); }
+.hero h1 em { font-style: normal; color: var(--brand); }
 .who-mini { background: rgba(255, 255, 255, .15); }
 .barbtn { color: var(--bar); }
 .nav a:hover { background: rgba(255, 255, 255, .14); }
 .nav a[aria-current="page"] { color: var(--bar); }
-.nav .count, .nav a[aria-current="page"] .count { background: var(--red); color: #fff; }
-.btn.cta { background: var(--red); border-color: var(--red); color: #fff; }
+.nav .count, .nav a[aria-current="page"] .count { background: var(--yellow); color: var(--yellow-ink); }
+.btn.cta { background: var(--yellow); border-color: var(--yellow); color: var(--yellow-ink); }
+.btn.cta:hover:not(:disabled) { background: #FFBE14; border-color: #FFBE14; opacity: 1; }
 .chip[aria-pressed="true"], .chip.on, .subnav a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
 .howto li::before, .doc .steps3 li::before, .tile-new .plus { background: var(--accent); color: var(--accent-fg); }
 .pt::before { background: var(--accent); }
-.pt:not(.dot)::before { background: var(--red); }
-.pt.dot::after { background: linear-gradient(var(--accent), var(--red)); }
+.pt:not(.dot)::before { background: var(--yellow-deep); }
+.pt.dot::after { background: linear-gradient(var(--accent), var(--yellow-deep)); }
 .tile-route .dot, .tile-route svg { color: var(--accent); background: var(--accent); }
 .tile-route svg { background: none; }
-.tile-route .sq { background: var(--red); }
+.tile-route .sq { background: var(--yellow-deep); }
 .pill.accepted, .pill.in_progress, .pill.active { background: var(--green); color: #fff; }
 .pill.pending, .pill.new { background: #FFF6CC; color: #7A5B00; box-shadow: none; }
 .st, .stars input:checked ~ label, .stars label:hover, .stars label:hover ~ label { color: #E8A400; }
