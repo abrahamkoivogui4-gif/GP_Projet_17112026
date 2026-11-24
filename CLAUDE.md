@@ -11,9 +11,9 @@ L'historique complet (serveur, décisions, préférences du propriétaire) est d
 
 ## État des branches
 
-En production : **`publier-pour-compte`** (contient tout sauf WhatsApp). `main` est en retard et devra recevoir toutes les branches.
+En production : **`publier-pour-compte`** ; à déployer : **`mentions-particulier`** (contient tout sauf WhatsApp). `main` est en retard et devra recevoir toutes les branches.
 
-Ordre : `design-epure` → `stats-visites` → `notif-email` → `trajets-defilants` → `bandeau-vitrine` → `espace-gp-vitrine` → `pages-infos` → `suppression-compte` → `etapes-demande` → `publier-pour-compte`.
+Ordre : `design-epure` → `stats-visites` → `notif-email` → `trajets-defilants` → `bandeau-vitrine` → `espace-gp-vitrine` → `pages-infos` → `suppression-compte` → `etapes-demande` → `publier-pour-compte` → `mentions-particulier`.
 Mise de côté : `notif-whatsapp` (WhatsApp Business payant) → future offre Premium, ne pas l'activer gratuitement.
 
 ## Repères techniques
@@ -22,7 +22,7 @@ Mise de côté : `notif-whatsapp` (WhatsApp Business payant) → future offre Pr
 - Style : `src/app/globals.css` (noir et blanc, fond gris `#f5f5f7`, cartes blanches, vitrine façon boutique, pied de page en rectangle arrondi).
 - Suivis visuels : `src/components/RequestSteps.tsx` (composant `Tracker` commun aux demandes et au badge vérifié).
 - Notifications : `src/lib/notify.ts` (journaux), `src/lib/mail.ts` (SMTP, variables `SMTP_*`).
-- Pages légales : textes dans `src/app/{mentions-legales,cgu,confidentialite}`, infos éditeur via `LEGAL_*`, `CONTACT_EMAIL`, `SOCIAL_*` (`src/lib/site.ts`).
+- Pages légales : textes dans `src/app/{mentions-legales,cgu,confidentialite}`, infos éditeur via `LEGAL_*`, `CONTACT_EMAIL`, `SOCIAL_*` (`src/lib/site.ts`). Sans `LEGAL_SIRET` : version « particulier » (adresse non publiée, LCEN art. 6-III-2) ; avec : version entreprise (+ `LEGAL_PHONE`).
 - Admin : publier pour un compte (`/gp/publier?pour=ID`, réservé aux admins), suppression de compte = anonymisation (`src/app/account-actions.ts`).
 - Autres sites du serveur : fichiers `caddy-extra/*.caddy` importés par le `Caddyfile` ; `scripts/installer-hub.sh` installe/met à jour le Business Hub.
 

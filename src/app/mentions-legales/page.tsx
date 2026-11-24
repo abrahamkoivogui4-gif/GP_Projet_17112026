@@ -6,19 +6,36 @@ export const dynamic = "force-dynamic";
 
 export default function Page() {
   const s = siteInfo();
+  const mail = s.contactEmail ? <a href={`mailto:${s.contactEmail}`}>{s.contactEmail}</a> : <Fill v="" label="e-mail de contact" />;
   return (
     <Doc title="Mentions légales" updated={LEGAL_UPDATED}>
       <section>
         <h2>Éditeur du site</h2>
-        <p>
-          Le site lilalink.fr est édité par <Fill v={s.legalName} label="nom ou raison sociale" />, <Fill v={s.legalForm} label="statut juridique" />.
-          <br />
-          Adresse : <Fill v={s.legalAddress} label="adresse" />
-          <br />
-          Immatriculation : <Fill v={s.legalId} label="SIREN / SIRET" />
-          <br />
-          Contact : {s.contactEmail ? <a href={`mailto:${s.contactEmail}`}>{s.contactEmail}</a> : <Fill v="" label="e-mail de contact" />}
-        </p>
+        {s.isCompany ? (
+          <p>
+            Le site lilalink.fr est édité par <Fill v={s.legalName} label="nom ou raison sociale" />, <Fill v={s.legalForm} label="statut juridique" />.
+            <br />
+            Adresse : <Fill v={s.legalAddress} label="adresse" />
+            <br />
+            Immatriculation : {s.legalId}
+            <br />
+            Contact : {mail}
+            <br />
+            Téléphone : <Fill v={s.contactPhone} label="téléphone" />
+          </p>
+        ) : (
+          <>
+            <p>
+              Le site lilalink.fr est édité par <Fill v={s.legalName} label="prénom et nom" />, particulier, à titre non professionnel.
+              <br />
+              Contact : {mail}
+            </p>
+            <p className="tag">
+              Conformément à l&apos;article 6-III-2 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l&apos;économie numérique, l&apos;adresse
+              de l&apos;éditeur n&apos;est pas publiée : ses coordonnées complètes ont été communiquées à l&apos;hébergeur ci-dessous.
+            </p>
+          </>
+        )}
         <p>
           Directeur de la publication : <Fill v={s.publisher} label="nom" />
         </p>

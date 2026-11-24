@@ -14,7 +14,15 @@ export default function Page() {
       <section>
         <h2>Responsable du traitement</h2>
         <p>
-          <Fill v={s.legalName} label="nom ou raison sociale" />, <Fill v={s.legalAddress} label="adresse" />. Contact : {mail}.
+          <Fill v={s.legalName} label="nom ou raison sociale" />
+          {s.isCompany ? (
+            <>
+              , <Fill v={s.legalAddress} label="adresse" />
+            </>
+          ) : (
+            ", éditeur du site à titre de particulier"
+          )}
+          . Contact : {mail}.
         </p>
       </section>
       <section>
