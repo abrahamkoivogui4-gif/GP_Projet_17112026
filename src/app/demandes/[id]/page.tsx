@@ -94,6 +94,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
           side={side}
           departureDate={t.departureDate}
           deliveryDays={t.deliveryDays}
+          offerBy={offer?.by ?? null}
         />
 
         {/* En attente */}

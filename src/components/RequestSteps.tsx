@@ -57,6 +57,7 @@ export function RequestSteps({
   side,
   departureDate,
   deliveryDays,
+  offerBy = null,
 }: {
   status: string;
   createdAt: Date;
@@ -68,6 +69,8 @@ export function RequestSteps({
   side: "client" | "gp" | "admin";
   departureDate: string;
   deliveryDays: number;
+  /** Négociation en cours : qui a fait la dernière proposition de prix. */
+  offerBy?: "client" | "gp" | null;
 }) {
   const you = side === "client";
   const gpFirst = gpName.split(" ")[0];
@@ -101,6 +104,13 @@ export function RequestSteps({
     mood = "sad";
     title = "Demande annulée";
     text = "Cette demande n'est plus active.";
+  } else if (status === "pending" && offerBy === "gp") {
+    mood = "go";
+    title = you ? `${gpFirst} vous propose un autre prix` : "Vous avez proposé un autre prix";
+    text = you ? "Acceptez son prix ou faites une autre proposition, juste en dessous." : "Le client peut accepter votre prix ou vous répondre.";
+  } else if (status === "pending" && offerBy === "client") {
+    title = you ? `En attente de ${gpFirst}` : "Le client propose un autre prix";
+    text = you ? "Votre demande et votre prix sont bien arrivés. Vous serez prévenu dès sa réponse." : "Acceptez son prix, refusez, ou faites une autre proposition.";
   } else if (status === "pending") {
     title = you ? `En attente de ${gpFirst}` : "Nouvelle demande pour vous";
     text = you ? "Votre demande est bien arrivée. Vous serez prévenu dès sa réponse." : "Lisez la demande puis acceptez ou refusez.";
