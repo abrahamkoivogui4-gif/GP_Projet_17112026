@@ -2,19 +2,24 @@
 import { useActionState, useState } from "react";
 import { createRequest } from "@/app/actions";
 import type { FormState } from "@/app/auth-actions";
-import { CATEGORIES, COUNTRY_CODES } from "@/lib/constants";
+import { CATEGORIES, COUNTRY_CODES, MAX_PRICE } from "@/lib/constants";
+import { NumberStepper } from "./TripFields";
 import { SubmitButton } from "./SubmitButton";
 
 export function RequestForm(p: { tripId: number; gpName: string; price: number; free: number; forbidden: string[]; defaultCc: string }) {
   const [state, action] = useActionState<FormState, FormData>(createRequest, {});
   const [kg, setKg] = useState(Math.min(5, p.free));
   const [ok, setOk] = useState(false);
+  const [nego, setNego] = useState(false);
+  const [offer, setOffer] = useState(Math.max(1, p.price - 1));
+  const unit = nego ? offer : p.price;
 
   return (
     <form action={action} className="card">
       <h2>Demander {p.gpName}</h2>
       <input type="hidden" name="tripId" value={p.tripId} />
       <input type="hidden" name="weightKg" value={kg} />
+      {nego && <input type="hidden" name="offerPrice" value={offer} />}
       <div className="field">
         <span className="label">Poids de votre colis</span>
         <div className="stepper">
@@ -34,13 +39,33 @@ export function RequestForm(p: { tripId: number; gpName: string; price: number; 
       </div>
       <div className="total">
         <span>
-          Total estimé
+          {nego ? "Total proposé" : "Total estimé"}
           <br />
           <small className="tag">
-            {kg} kg × {p.price} €
+            {kg} kg × {unit} €
           </small>
         </span>
-        <b>{(kg * p.price).toLocaleString("fr-FR")} €</b>
+        <b>{(kg * unit).toLocaleString("fr-FR")} €</b>
+      </div>
+      <div className="offer-tog">
+        <label className="check">
+          <input type="checkbox" checked={nego} onChange={(e) => setNego(e.target.checked)} />
+          <span>
+            Proposer un autre prix
+            <br />
+            <small className="tag">
+              Prix de {p.gpName} : {p.price} € le kilo. {p.gpName} pourra accepter, refuser ou vous faire une autre proposition.
+            </small>
+          </span>
+        </label>
+        {nego && (
+          <>
+            <span className="label" style={{ textAlign: "center" }}>
+              Votre prix au kilo
+            </span>
+            <NumberStepper value={offer} onChange={setOffer} unit="€/kg" max={MAX_PRICE} />
+          </>
+        )}
       </div>
       <div className="field">
         <label htmlFor="category">Type de colis</label>

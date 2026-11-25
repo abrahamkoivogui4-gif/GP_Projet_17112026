@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth";
 import { euros, shortDate } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
 import { TripRoute } from "@/components/TripCard";
+import { currentPrice } from "@/lib/offer";
 
 export const metadata = { title: "Mes demandes" };
 export const dynamic = "force-dynamic";
@@ -43,7 +44,7 @@ export default async function Page() {
           <StatusPill status={x.r.status} /> · GP : <b>{x.gpName}</b> · départ {shortDate(x.t.departureDate)}
         </span>
         <b>
-          {x.r.weightKg} kg · {euros(x.r.weightKg * x.r.pricePerKg)}
+          {x.r.weightKg} kg · {euros(x.r.weightKg * currentPrice(x.r))}
         </b>
       </div>
     </Link>

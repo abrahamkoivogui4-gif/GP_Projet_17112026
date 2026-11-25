@@ -92,6 +92,9 @@ export const requests = pgTable(
     recipientPhone: text("recipient_phone").notNull().default(""), // format international
     deliveryCode: text("delivery_code"), // code à 6 chiffres, créé quand le GP accepte
     codeAttempts: integer("code_attempts").notNull().default(0), // essais de code ratés
+    // Négociation : dernière proposition de prix au kilo, et qui l'a faite. Vide = prix de l'annonce.
+    offerPricePerKg: integer("offer_price_per_kg"),
+    offerBy: text("offer_by").$type<"client" | "gp">(),
 
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     decidedAt: timestamp("decided_at", { withTimezone: true }),

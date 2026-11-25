@@ -1,10 +1,10 @@
 "use client";
-import { useActionState } from "react";
+import { Fragment, useActionState } from "react";
 import { confirmDelivery, decideRequest, postReview } from "@/app/actions";
 import type { FormState } from "@/app/auth-actions";
 import { SubmitButton } from "./SubmitButton";
 
-export function DecisionForm({ id }: { id: number }) {
+export function DecisionForm({ id, acceptLabel, canAccept = true }: { id: number; acceptLabel?: string; canAccept?: boolean }) {
   const [state, action] = useActionState<FormState, FormData>(decideRequest, {});
   return (
     <form action={action} className="card" style={{ padding: 0, border: 0 }}>
@@ -21,9 +21,11 @@ export function DecisionForm({ id }: { id: number }) {
       {state.error && <p className="err">{state.error}</p>}
       {state.ok && <p className="okmsg">{state.ok}</p>}
       <div className="row">
-        <SubmitButton name="decision" value="accept">
-          Accepter
-        </SubmitButton>
+        {canAccept && (
+          <SubmitButton name="decision" value="accept">
+            {acceptLabel ?? "Accepter"}
+          </SubmitButton>
+        )}
         <SubmitButton name="decision" value="refuse" className="btn no">
           Refuser
         </SubmitButton>
@@ -44,12 +46,12 @@ export function ReviewForm({ id, gpName }: { id: number; gpName: string }) {
       <fieldset className="stars" style={{ border: 0, padding: 0, margin: 0 }}>
         <legend className="vh">Note sur 5</legend>
         {[5, 4, 3, 2, 1].map((n) => (
-          <span key={n} style={{ display: "contents" }}>
+          <Fragment key={n}>
             <input className="vh" type="radio" name="stars" id={`s${id}-${n}`} value={n} />
             <label htmlFor={`s${id}-${n}`} aria-label={`${n} étoile${n > 1 ? "s" : ""}`}>
               ★
             </label>
-          </span>
+          </Fragment>
         ))}
       </fieldset>
       <div className="field">

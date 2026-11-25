@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { requests, trips, users } from "@/db/schema";
 import { dateTime, euros } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
+import { currentPrice } from "@/lib/offer";
 
 export const metadata = { title: "Demandes" };
 export const dynamic = "force-dynamic";
@@ -32,7 +33,7 @@ export default async function Page() {
               </b>
             </Link>
             <small>
-              {clientName} avec {gpName} · {r.weightKg} kg · {r.category} · {euros(r.weightKg * r.pricePerKg)} · {dateTime(r.createdAt)}
+              {clientName} avec {gpName} · {r.weightKg} kg · {r.category} · {euros(r.weightKg * currentPrice(r))} · {dateTime(r.createdAt)}
             </small>
           </div>
           <StatusPill status={r.status} />

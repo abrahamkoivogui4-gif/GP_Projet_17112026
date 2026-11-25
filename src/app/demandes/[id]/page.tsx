@@ -12,6 +12,8 @@ import { Chat } from "@/components/Chat";
 import { DecisionForm, DeliveryCodeForm, ReviewForm } from "@/components/RequestForms";
 import { StatusPill } from "@/components/StatusPill";
 import { RequestSteps } from "@/components/RequestSteps";
+import { PriceOffer } from "@/components/PriceOffer";
+import { currentPrice, pendingOffer } from "@/lib/offer";
 import { Stars } from "@/components/Stars";
 import { TripRoute } from "@/components/TripCard";
 import { SubmitButton } from "@/components/SubmitButton";
@@ -42,7 +44,9 @@ export default async function Page({ params, searchParams }: { params: Promise<{
 
   const other = side === "gp" ? client : gp;
   const st = r.status;
-  const total = r.weightKg * r.pricePerKg;
+  const price = currentPrice(r);
+  const offer = pendingOffer(r);
+  const total = r.weightKg * price;
 
   return (
     <>
@@ -70,7 +74,7 @@ export default async function Page({ params, searchParams }: { params: Promise<{
         )}
         <div className="total">
           <span>
-            {r.weightKg} kg × {r.pricePerKg} €
+            {r.weightKg} kg × {price} €{offer ? ` (proposé par ${offer.by === side ? "vous" : offer.by === "gp" ? gp.name : client.name})` : ""}
             <br />
             <small className="tag">
               Livraison sous {delayLabel(t.deliveryDays)}, au plus tard le {etaLabel(t.departureDate, t.deliveryDays)}
@@ -93,16 +97,29 @@ export default async function Page({ params, searchParams }: { params: Promise<{
         />
 
         {/* En attente */}
+        {st === "pending" && (side === "client" || side === "gp") && (
+          <PriceOffer
+            key={`${r.offerBy}-${r.offerPricePerKg}`}
+            id={r.id}
+            side={side}
+            adPrice={r.pricePerKg}
+            offer={offer}
+            weightKg={r.weightKg}
+            otherName={other.name}
+          />
+        )}
         {st === "pending" && side === "client" && (
           <>
-            <p className="warn">En attente de la réponse de {gp.name}.</p>
+            {offer?.by !== "gp" && <p className="warn">En attente de la réponse de {gp.name}.</p>}
             <form action={cancelRequest}>
               <input type="hidden" name="id" value={r.id} />
               <SubmitButton className="btn no small">Annuler ma demande</SubmitButton>
             </form>
           </>
         )}
-        {st === "pending" && side === "gp" && <DecisionForm id={r.id} />}
+        {st === "pending" && side === "gp" && (
+          <DecisionForm id={r.id} canAccept={offer?.by !== "gp"} acceptLabel={offer ? `Accepter à ${offer.price} €/kg` : undefined} />
+        )}
 
         {/* Refusée / annulée */}
         {st === "refused" && (

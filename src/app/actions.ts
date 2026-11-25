@@ -9,7 +9,8 @@ import { db } from "@/db";
 import { messages, reports, requests, reviews, trips, users, verificationDocs } from "@/db/schema";
 import { requireGp, requireUser, type SessionUser } from "@/lib/auth";
 import { CATEGORIES, CITIES, DELAYS, MAX_KG, MAX_PRICE, REPORT_TYPES, URGENT_REPORT_TYPES } from "@/lib/constants";
-import { shortDate, todayIso } from "@/lib/format";
+import { euros, shortDate, todayIso } from "@/lib/format";
+import { currentPrice, pendingOffer } from "@/lib/offer";
 import { notify } from "@/lib/notify";
 import { getTrip } from "@/lib/queries";
 import { loadRequestFor } from "@/lib/requests";
@@ -137,6 +138,7 @@ const requestSchema = z.object({
   description: z.string().trim().max(500).default(""),
   recipientName: z.string().trim().min(2, "Indiquez le nom de la personne qui recevra le colis.").max(60),
   confirm: z.literal("on", { errorMap: () => ({ message: "Confirmez que votre colis ne contient aucun objet refusé." }) }),
+  offerPrice: z.coerce.number().int().min(1).max(MAX_PRICE).optional().catch(undefined),
 });
 
 export async function createRequest(_: FormState, fd: FormData): Promise<FormState> {
@@ -158,6 +160,9 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
   });
   if (already) redirect(`/demandes/${already.id}`);
 
+  // Négociation : le client peut proposer un autre prix au kilo que celui de l'annonce.
+  const offer = parsed.data.offerPrice && parsed.data.offerPrice !== t.pricePerKg ? parsed.data.offerPrice : null;
+
   const [r] = await db
     .insert(requests)
     .values({
@@ -169,14 +174,21 @@ export async function createRequest(_: FormState, fd: FormData): Promise<FormSta
       recipientName: parsed.data.recipientName,
       recipientPhone,
       pricePerKg: t.pricePerKg,
+      offerPricePerKg: offer,
+      offerBy: offer ? "client" : null,
     })
     .returning({ id: requests.id });
   await db.insert(messages).values({
     requestId: r.id,
     senderId: u.id,
-    body: `Bonjour, je voudrais envoyer ${parsed.data.weightKg} kg (${parsed.data.category.toLowerCase()}) avec vous.`,
+    body:
+      `Bonjour, je voudrais envoyer ${parsed.data.weightKg} kg (${parsed.data.category.toLowerCase()}) avec vous.` +
+      (offer ? ` Je vous propose ${offer} € le kilo au lieu de ${t.pricePerKg} €, soit ${euros(offer * parsed.data.weightKg)} au total.` : ""),
   });
-  await notify(t.gpPhone, `Nouvelle demande de ${u.name} : ${parsed.data.weightKg} kg pour ${t.fromCity} → ${t.toCity}.`);
+  await notify(
+    t.gpPhone,
+    `Nouvelle demande de ${u.name} : ${parsed.data.weightKg} kg pour ${t.fromCity} → ${t.toCity}.` + (offer ? ` Prix proposé : ${offer} €/kg.` : ""),
+  );
   const gp = await db.query.users.findFirst({ where: eq(users.id, t.gpId), columns: { name: true, email: true, emailNotify: true } });
   if (gp?.emailNotify && gp.email) {
     const mail = {
@@ -214,9 +226,17 @@ export async function decideRequest(_: FormState, fd: FormData): Promise<FormSta
     if (row.r.weightKg > free) return { error: `Il ne vous reste que ${free} kg sur ce trajet. Augmentez la place dans « Mes trajets » ou refusez la demande.` };
   }
   const status = p.data.decision === "accept" ? "accepted" : "refused";
+  // Accepter = accepter le prix en cours. Le GP ne peut pas « accepter » sa propre contre-proposition : c'est au client de le faire.
+  const offer = pendingOffer(row.r);
+  if (status === "accepted" && offer?.by === "gp") return { error: "Le client doit d'abord répondre à votre proposition de prix." };
   await db
     .update(requests)
-    .set({ status, gpNote: p.data.note, decidedAt: new Date(), ...(status === "accepted" ? { deliveryCode: newCode(), codeAttempts: 0 } : {}) })
+    .set({
+      status,
+      gpNote: p.data.note,
+      decidedAt: new Date(),
+      ...(status === "accepted" ? { deliveryCode: newCode(), codeAttempts: 0, pricePerKg: currentPrice(row.r) } : {}),
+    })
     .where(eq(requests.id, row.r.id));
   if (p.data.note) await db.insert(messages).values({ requestId: row.r.id, senderId: u.id, body: p.data.note });
   const client = await db.query.users.findFirst({ where: eq(users.id, row.r.clientId), columns: { phone: true } });
@@ -230,6 +250,63 @@ export async function decideRequest(_: FormState, fd: FormData): Promise<FormSta
   revalidatePath(`/demandes/${row.r.id}`);
   revalidatePath("/gp/demandes");
   return { ok: status === "accepted" ? "Demande acceptée." : "Demande refusée." };
+}
+
+/* ------------------------------------------------------------------ */
+/* Négociation du prix                                                 */
+/* ------------------------------------------------------------------ */
+
+const offerSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  price: z.coerce.number().int().min(1, "Le prix doit être d'au moins 1 €.").max(MAX_PRICE, `Le prix ne peut pas dépasser ${MAX_PRICE} € le kilo.`),
+});
+
+/** Le client ou le GP fait une (contre-)proposition de prix au kilo, tant que la demande est en attente. */
+export async function proposePrice(_: FormState, fd: FormData): Promise<FormState> {
+  const u = await requireUser();
+  const p = offerSchema.safeParse(Object.fromEntries(fd));
+  if (!p.success) return { error: p.error.issues[0].message };
+  const row = await loadRequestFor(u, p.data.id);
+  if (!row || (row.side !== "client" && row.side !== "gp")) return { error: "Demande introuvable." };
+  if (row.r.status !== "pending") return { error: "Cette demande a déjà reçu une réponse." };
+  if (p.data.price === currentPrice(row.r)) return { error: `Le prix en cours est déjà de ${p.data.price} € le kilo.` };
+  if (!rateLimit(`offer:${row.r.id}`, 10, 24 * 3600_000)) return { error: "Trop de propositions aujourd'hui pour cette demande. Discutez-en dans la messagerie." };
+
+  await db.update(requests).set({ offerPricePerKg: p.data.price, offerBy: row.side }).where(eq(requests.id, row.r.id));
+  await db.insert(messages).values({
+    requestId: row.r.id,
+    senderId: u.id,
+    body: `Je propose ${p.data.price} € le kilo, soit ${euros(p.data.price * row.r.weightKg)} pour ${row.r.weightKg} kg.`,
+  });
+  const otherId = row.side === "client" ? row.t.gpId : row.r.clientId;
+  const other = await db.query.users.findFirst({ where: eq(users.id, otherId), columns: { phone: true } });
+  if (other) await notify(other.phone, `${u.name} propose ${p.data.price} €/kg pour le colis ${row.t.fromCity} → ${row.t.toCity}. Répondez dans l'application.`);
+  revalidatePath(`/demandes/${row.r.id}`);
+  revalidatePath("/gp/demandes");
+  return { ok: "Proposition envoyée." };
+}
+
+/** Le client accepte la contre-proposition du GP : la demande est validée à ce prix. */
+export async function acceptOffer(_: FormState, fd: FormData): Promise<FormState> {
+  const u = await requireUser();
+  const row = await loadRequestFor(u, Number(fd.get("id")));
+  if (!row || row.side !== "client") return { error: "Demande introuvable." };
+  const offer = pendingOffer(row.r);
+  if (row.r.status !== "pending" || offer?.by !== "gp") return { error: "Il n'y a plus de proposition à accepter." };
+  const t = await getTrip(row.t.id);
+  const free = (t?.capacityKg ?? 0) - (t?.bookedKg ?? 0);
+  if (!t || t.status !== "active") return { error: "Ce trajet n'est plus disponible." };
+  if (row.r.weightKg > free) return { error: `Le GP n'a plus que ${free} kg disponibles sur ce trajet.` };
+
+  await db
+    .update(requests)
+    .set({ status: "accepted", pricePerKg: offer.price, decidedAt: new Date(), deliveryCode: newCode(), codeAttempts: 0 })
+    .where(eq(requests.id, row.r.id));
+  await db.insert(messages).values({ requestId: row.r.id, senderId: u.id, body: `J'accepte votre prix de ${offer.price} € le kilo. Merci !` });
+  await notify(t.gpPhone, `${u.name} a accepté votre prix de ${offer.price} €/kg pour ${row.t.fromCity} → ${row.t.toCity}. La demande est validée.`);
+  revalidatePath(`/demandes/${row.r.id}`);
+  revalidatePath("/gp/demandes");
+  return { ok: "Prix accepté : votre demande est validée." };
 }
 
 export async function cancelRequest(fd: FormData) {

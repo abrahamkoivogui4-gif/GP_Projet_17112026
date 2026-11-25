@@ -6,6 +6,7 @@ import { requireGp } from "@/lib/auth";
 import { euros, shortDate } from "@/lib/format";
 import { StatusPill } from "@/components/StatusPill";
 import { DecisionForm } from "@/components/RequestForms";
+import { currentPrice, pendingOffer } from "@/lib/offer";
 
 export const metadata = { title: "Demandes reçues" };
 export const dynamic = "force-dynamic";
@@ -35,7 +36,7 @@ export default async function Page() {
           </p>
           <div className="note">
             <b>
-              {r.weightKg} kg · {r.category} · {euros(r.weightKg * r.pricePerKg)}
+              {r.weightKg} kg · {r.category} · {euros(r.weightKg * currentPrice(r))}
             </b>
             {r.description || "Pas de description"}
           </div>
@@ -44,9 +45,23 @@ export default async function Page() {
               À remettre à {r.recipientName} à {t.toCity}
             </p>
           )}
-          <DecisionForm id={r.id} />
+          {(() => {
+            const offer = pendingOffer(r);
+            return (
+              <>
+                {offer && (
+                  <p className={offer.by === "client" ? "warn" : "tag"}>
+                    {offer.by === "client"
+                      ? `${clientName} propose ${offer.price} € le kilo (votre prix : ${r.pricePerKg} €). Vous pouvez accepter, refuser ou faire une autre proposition depuis la discussion.`
+                      : `Vous avez proposé ${offer.price} € le kilo. En attente de la réponse de ${clientName}.`}
+                  </p>
+                )}
+                <DecisionForm id={r.id} canAccept={offer?.by !== "gp"} acceptLabel={offer ? `Accepter à ${offer.price} €/kg` : undefined} />
+              </>
+            );
+          })()}
           <Link className="btn alt small" href={`/demandes/${r.id}`}>
-            Ouvrir la discussion
+            Ouvrir la discussion et négocier
           </Link>
         </article>
       ))}

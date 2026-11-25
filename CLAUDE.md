@@ -11,9 +11,9 @@ L'historique complet (serveur, décisions, préférences du propriétaire) est d
 
 ## État des branches
 
-En production : **`publier-pour-compte`** ; à déployer : **`couleurs-bleu-france`** (contient tout sauf WhatsApp). `main` est en retard et devra recevoir toutes les branches.
+En production : **`publier-pour-compte`** ; à déployer : **`negociation-prix`** (contient tout sauf WhatsApp). `main` est en retard et devra recevoir toutes les branches.
 
-Ordre : `design-epure` → `stats-visites` → `notif-email` → `trajets-defilants` → `bandeau-vitrine` → `espace-gp-vitrine` → `pages-infos` → `suppression-compte` → `etapes-demande` → `publier-pour-compte` → `mentions-particulier` → `zones-elargies` → `textes-occident` → `couleurs-bleu-france`.
+Ordre : `design-epure` → `stats-visites` → `notif-email` → `trajets-defilants` → `bandeau-vitrine` → `espace-gp-vitrine` → `pages-infos` → `suppression-compte` → `etapes-demande` → `publier-pour-compte` → `mentions-particulier` → `zones-elargies` → `textes-occident` → `couleurs-bleu-france` → `negociation-prix`.
 Mise de côté : `notif-whatsapp` (WhatsApp Business payant) → future offre Premium, ne pas l'activer gratuitement.
 
 ## Repères techniques
@@ -24,6 +24,7 @@ Mise de côté : `notif-whatsapp` (WhatsApp Business payant) → future offre Pr
 - Notifications : `src/lib/notify.ts` (journaux), `src/lib/mail.ts` (SMTP, variables `SMTP_*`).
 - Pages légales : textes dans `src/app/{mentions-legales,cgu,confidentialite}`, infos éditeur via `LEGAL_*`, `CONTACT_EMAIL`, `SOCIAL_*` (`src/lib/site.ts`). Sans `LEGAL_SIRET` : version « particulier » (adresse non publiée, LCEN art. 6-III-2) ; avec : version entreprise (+ `LEGAL_PHONE`).
 - Villes : `CITY_GROUPS` dans `src/lib/constants.ts` (grandes villes seulement, par pays : Europe, Canada, États-Unis, Sénégal, Guinée, Côte d'Ivoire, Burkina Faso, Mali) ; indicatif du destinataire déduit de la ville.
+- Négociation du prix : colonnes `offer_price_per_kg` / `offer_by` de `requests` (dernière proposition, client ou GP) ; `src/lib/offer.ts` (`currentPrice`, `pendingOffer`), actions `proposePrice` / `acceptOffer`, encadré `src/components/PriceOffer.tsx`. À l'acceptation, `price_per_kg` prend le prix convenu. Celui qui a fait la dernière proposition ne peut pas l'accepter lui-même.
 - Admin : publier pour un compte (`/gp/publier?pour=ID`, réservé aux admins), suppression de compte = anonymisation (`src/app/account-actions.ts`).
 - Autres sites du serveur : fichiers `caddy-extra/*.caddy` importés par le `Caddyfile` ; `scripts/installer-hub.sh` installe/met à jour le Business Hub.
 

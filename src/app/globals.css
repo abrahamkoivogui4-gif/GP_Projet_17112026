@@ -456,3 +456,14 @@ input:focus, select:focus, textarea:focus, .legs select:focus, .search input:foc
 /* Dans la barre bleue, le badge vérifié passe en blanc avec une coche bleue pour rester visible */
 .top .vb path:first-of-type { fill: #fff; stroke: #fff; }
 .top .vb path:last-of-type { stroke: var(--bar); }
+
+/* Négociation du prix (demande en attente) */
+.nego { background: var(--shelf); border: 1px solid rgba(224, 168, 0, .35); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.nego-t { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.nego-row { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.nego-old { text-decoration: line-through; color: var(--muted); }
+.nego-now { font-weight: 600; }
+.nego-now b { font: 700 1.15rem var(--display); }
+.nego-form { display: flex; flex-direction: column; gap: 10px; }
+.offer-tog { display: flex; flex-direction: column; gap: 10px; background: var(--shelf); border-radius: 14px; padding: 12px; }
+.offer-tog .check { margin: 0; }
