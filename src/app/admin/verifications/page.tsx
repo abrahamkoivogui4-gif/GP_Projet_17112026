@@ -22,7 +22,7 @@ export default async function Page() {
   return (
     <>
       <h1>Vérifications d&apos;identité ({pending.length})</h1>
-      <p className="info">Vérifiez que le nom sur la pièce correspond au compte et que la photo est nette. La pièce est supprimée du serveur dès votre décision.</p>
+      <p className="info">Vérifiez que le nom sur la pièce correspond au compte et que la photo est nette. La pièce est supprimée du serveur dès votre décision : remplissez la fiche d&apos;identité avant de valider.</p>
       {pending.length === 0 && <p className="tag">Rien à vérifier.</p>}
       {pending.map(({ d, name, phone }) => (
         <div className="card" key={d.id}>
@@ -33,6 +33,9 @@ export default async function Page() {
           </div>
           <a className="btn alt small" href={`/admin/verifications/${d.id}/fichier`} target="_blank" rel="noopener">
             Voir la pièce d&apos;identité
+          </a>
+          <a className="btn alt small" href={`/admin/utilisateurs/${d.userId}/identite`} target="_blank" rel="noopener">
+            Remplir la fiche d&apos;identité
           </a>
           <form action={decideVerification} className="field" style={{ gap: 10 }}>
             <input type="hidden" name="id" value={d.id} />

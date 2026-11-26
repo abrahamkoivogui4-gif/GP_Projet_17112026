@@ -37,7 +37,8 @@ export default function Page() {
           </li>
           <li>
             <b>Le badge « GP vérifié »</b> : la photo de votre pièce d&apos;identité, visible uniquement par l&apos;équipe Lilalink et supprimée dès la
-            décision.
+            décision. L&apos;équipe note seulement les informations de la pièce (nom, date de naissance, type, numéro, pays, date de validité), pour la
+            sécurité et en cas de litige.
           </li>
           <li>
             <b>Les signalements</b> que vous envoyez et les réponses de l&apos;équipe.
@@ -80,7 +81,11 @@ export default function Page() {
         <h2>Durée de conservation</h2>
         <ul>
           <li>Les données de votre compte sont conservées tant que votre compte existe, et effacées quand vous le supprimez.</li>
-          <li>La pièce d&apos;identité est supprimée dès que l&apos;équipe a pris sa décision.</li>
+          <li>La photo de la pièce d&apos;identité est supprimée dès que l&apos;équipe a pris sa décision.</li>
+          <li>
+            Les informations notées à partir de la pièce sont gardées tant que le compte existe, puis 1 an après sa suppression (en cas de litige), et
+            ensuite effacées.
+          </li>
           <li>Les sauvegardes de la base de données sont gardées 14 jours.</li>
         </ul>
       </section>
@@ -92,7 +97,8 @@ export default function Page() {
         </p>
         <p>
           Pour supprimer votre compte : <Link href="/compte">Mon compte</Link> → « Supprimer mon compte ». Votre nom, votre numéro, votre e-mail,
-          votre mot de passe, votre pièce d&apos;identité et les coordonnées de vos destinataires sont effacés. Vos anciens messages et avis restent
+          votre mot de passe, la photo de votre pièce d&apos;identité et les coordonnées de vos destinataires sont effacés (les informations notées à partir
+          de la pièce sont gardées 1 an en cas de litige). Vos anciens messages et avis restent
           visibles pour les personnes concernées, sans votre nom.
         </p>
       </section>

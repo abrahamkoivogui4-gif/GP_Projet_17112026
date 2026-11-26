@@ -41,7 +41,7 @@ const QA: { q: string; a: React.ReactNode }[] = [
     q: "Que veut dire « GP vérifié » ?",
     a: (
       <p>
-        Le GP a envoyé une pièce d&apos;identité que l&apos;équipe Lilalink a contrôlée. La pièce est supprimée après la vérification. Le badge ne garantit
+        Le GP a envoyé une pièce d&apos;identité que l&apos;équipe Lilalink a contrôlée. La photo de la pièce est supprimée après la vérification ; l&apos;équipe garde seulement les informations de la pièce, en cas de litige. Le badge ne garantit
         pas la qualité du transport : regardez aussi les avis.
       </p>
     ),
@@ -85,8 +85,8 @@ const QA: { q: string; a: React.ReactNode }[] = [
     q: "Comment supprimer mon compte ou mes données ?",
     a: (
       <p>
-        Dans <Link href="/compte">Mon compte</Link>, tout en bas : « Supprimer mon compte ». Votre nom, votre numéro, votre e-mail et votre
-        pièce d&apos;identité sont effacés. Si un envoi validé n&apos;est pas encore livré, terminez-le ou annulez-le d&apos;abord. Voir aussi notre{" "}
+        Dans <Link href="/compte">Mon compte</Link>, tout en bas : « Supprimer mon compte ». Votre nom, votre numéro, votre e-mail et la photo
+        de votre pièce d&apos;identité sont effacés (les informations notées à partir de la pièce sont gardées 1 an en cas de litige). Si un envoi validé n&apos;est pas encore livré, terminez-le ou annulez-le d&apos;abord. Voir aussi notre{" "}
         <Link href="/confidentialite">politique de confidentialité</Link>.
       </p>
     ),

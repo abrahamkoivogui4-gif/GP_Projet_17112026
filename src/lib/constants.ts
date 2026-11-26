@@ -87,3 +87,9 @@ export const SESSION_DAYS = 30;
 export function countryCodeForCity(city: string) {
   return CITY_GROUPS.find((g) => g.cities.includes(city))?.cc ?? "+33";
 }
+
+/** Types de pièce d'identité pour la fiche remplie par l'admin. */
+export const ID_DOC_TYPES = ["Carte d'identité", "Passeport", "Titre de séjour", "Permis de conduire", "Autre"];
+
+/** Après la suppression d'un compte, sa fiche d'identité est gardée 1 an (litiges), puis effacée. */
+export const IDENTITY_KEEP_DAYS = 365;

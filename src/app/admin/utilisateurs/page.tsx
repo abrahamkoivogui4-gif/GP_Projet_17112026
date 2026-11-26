@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { desc, ilike, or } from "drizzle-orm";
+import { desc, ilike, inArray, or } from "drizzle-orm";
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { identityRecords, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { dateTime } from "@/lib/format";
 import { formatPhone } from "@/lib/phone";
@@ -21,6 +21,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
     ? or(ilike(users.name, `%${q.replace(/[%_]/g, "")}%`), ...(digits.length >= 3 ? [ilike(users.phone, `%${digits}%`)] : []))
     : undefined;
   const rows = await db.select().from(users).where(where).orderBy(desc(users.createdAt)).limit(100);
+  const withId = new Set(
+    rows.length
+      ? (await db.select({ id: identityRecords.userId }).from(identityRecords).where(inArray(identityRecords.userId, rows.map((r) => r.id)))).map((r) => r.id)
+      : [],
+  );
 
   return (
     <div className="card">
@@ -39,6 +44,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ q
               {u.deletedAt ? "—" : formatPhone(u.phone)} · {u.role === "admin" ? "Admin" : u.role === "gp" ? "GP" : "Client"} · inscrit le {dateTime(u.createdAt)}
             </small>
           </div>
+          <Link className={`btn small ${withId.has(u.id) ? "alt" : ""}`} href={`/admin/utilisateurs/${u.id}/identite`}>
+            {withId.has(u.id) ? "✓ Pièce d'identité" : "Pièce d'identité"}
+          </Link>
           {u.id !== me.id && !u.deletedAt && (
             <>
               {!u.suspended && u.role !== "admin" && (

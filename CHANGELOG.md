@@ -6,6 +6,7 @@ Le plus récent en haut. Chaque ligne correspond à une branche (chacune contien
 
 | Date | Branche | Évolution |
 | --- | --- | --- |
+| 26/11 | `fiche-identite` | **Fiche pièce d'identité** (admin) : pour chaque utilisateur, l'admin note les informations de la pièce (nom, type, numéro, date de naissance, validité, pays, remarque). Alerte si le nom diffère du compte ou si la pièce est expirée. Fiche gardée 1 an après la suppression du compte, puis effacée. Politique de confidentialité et FAQ mises à jour. |
 | 25/11 | `negociation-prix` | **Négociation du prix** : le client peut proposer un autre prix au kilo en envoyant sa demande (ou ensuite) ; le GP accepte à ce prix, refuse ou contre-propose ; le client peut accepter la contre-proposition (demande validée à ce prix). Chaque proposition apparaît dans la discussion. Correction : les étoiles de l'avis s'allument jusqu'à celle choisie. |
 | 24/11 | `couleurs-bleu-france` | Couleurs : duo **bleu azur `#0077D9` + jaune soleil `#FFC93C`** (boutons d'action jaunes, texte noir) ; vert = validé, rouge = erreurs. Mode sombre adapté, icône mise à jour. |
 | 24/11 | `textes-occident` | Textes « de l'Occident vers la Guinée et l'Afrique de l'Ouest » ; ajout de Rome ; Guinée : Conakry uniquement. |

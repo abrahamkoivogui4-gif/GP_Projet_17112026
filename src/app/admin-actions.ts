@@ -3,10 +3,12 @@ import { randomInt } from "node:crypto";
 import { and, eq, isNull } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { reports, reviews, sessions, trips, users, verificationDocs } from "@/db/schema";
+import { identityRecords, reports, reviews, sessions, trips, users, verificationDocs } from "@/db/schema";
 import { hashPassword, requireAdmin } from "@/lib/auth";
 import { notify } from "@/lib/notify";
 import { deleteUpload } from "@/lib/uploads";
+import { z } from "zod";
+import { ID_DOC_TYPES } from "@/lib/constants";
 import type { FormState } from "./auth-actions";
 
 const num = (fd: FormData, k: string) => Number(fd.get(k)) || 0;
@@ -79,4 +81,58 @@ export async function deleteReview(fd: FormData) {
   await requireAdmin();
   await db.delete(reviews).where(eq(reviews.id, num(fd, "id")));
   revalidatePath("/admin/avis");
+}
+
+/* ------------------------------------------------------------------ */
+/* Fiche « pièce d'identité » (réservée à l'admin)                     */
+/* ------------------------------------------------------------------ */
+
+const isoDate = z
+  .string()
+  .trim()
+  .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Date invalide.")
+  .transform((v) => v || null);
+
+const identitySchema = z.object({
+  userId: z.coerce.number().int().positive(),
+  fullName: z.string().trim().min(2, "Indiquez le nom et le prénom écrits sur la pièce.").max(120),
+  birthDate: isoDate,
+  docType: z.enum(ID_DOC_TYPES as [string, ...string[]], { errorMap: () => ({ message: "Choisissez le type de pièce." }) }),
+  country: z.string().trim().max(60).default(""),
+  docNumber: z
+    .string()
+    .trim()
+    .max(40)
+    .transform((v) => v.toUpperCase().replace(/\s+/g, " "))
+    .default(""),
+  expiresOn: isoDate,
+  note: z.string().trim().max(500).default(""),
+});
+
+export type IdentityState = FormState & { values?: Record<string, string> };
+
+export async function saveIdentity(_: IdentityState, fd: FormData): Promise<IdentityState> {
+  const me = await requireAdmin();
+  const raw = Object.fromEntries([...fd.entries()].filter(([, v]) => typeof v === "string")) as Record<string, string>;
+  const p = identitySchema.safeParse(raw);
+  if (!p.success) return { error: p.error.issues[0].message, values: raw };
+  const target = await db.query.users.findFirst({ where: eq(users.id, p.data.userId), columns: { id: true } });
+  if (!target) return { error: "Utilisateur introuvable.", values: raw };
+  const now = new Date();
+  const data = { ...p.data, checkedBy: me.id, updatedAt: now };
+  await db
+    .insert(identityRecords)
+    .values({ ...data, checkedAt: now })
+    .onConflictDoUpdate({ target: identityRecords.userId, set: data });
+  revalidatePath(`/admin/utilisateurs/${p.data.userId}/identite`);
+  revalidatePath("/admin/utilisateurs");
+  return { ok: "Fiche enregistrée." };
+}
+
+export async function deleteIdentity(fd: FormData) {
+  await requireAdmin();
+  const id = num(fd, "userId");
+  await db.delete(identityRecords).where(eq(identityRecords.userId, id));
+  revalidatePath(`/admin/utilisateurs/${id}/identite`);
+  revalidatePath("/admin/utilisateurs");
 }

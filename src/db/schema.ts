@@ -139,6 +139,26 @@ export const reviews = pgTable(
   (t) => [uniqueIndex("reviews_request_idx").on(t.requestId), index("reviews_gp_idx").on(t.gpId)],
 );
 
+/**
+ * Fiche « pièce d'identité » remplie par l'admin (une par utilisateur).
+ * On garde les informations de la pièce, jamais la photo (supprimée après le contrôle).
+ */
+export const identityRecords = pgTable("identity_records", {
+  userId: integer("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  fullName: text("full_name").notNull(), // nom et prénom tels qu'écrits sur la pièce
+  birthDate: date("birth_date", { mode: "string" }),
+  docType: text("doc_type").notNull(),
+  country: text("country").notNull().default(""),
+  docNumber: text("doc_number").notNull().default(""),
+  expiresOn: date("expires_on", { mode: "string" }),
+  note: text("note").notNull().default(""),
+  checkedBy: integer("checked_by").references(() => users.id, { onDelete: "set null" }),
+  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const verificationDocs = pgTable("verification_docs", {
   id: serial("id").primaryKey(),
   userId: integer("user_id")
